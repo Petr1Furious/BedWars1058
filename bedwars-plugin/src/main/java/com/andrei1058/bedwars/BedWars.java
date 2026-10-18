@@ -517,6 +517,22 @@ public class BedWars extends JavaPlugin {
      * @return true when custom adapter was registered.
      */
     private boolean handleWorldAdapter() {
+        // Advanced Slime Paper 4.x (26.x): the API lives in the server jar, no plugin lookup needed.
+        try {
+            Class.forName("com.infernalsuite.asp.api.AdvancedSlimePaperAPI");
+            String adapterPath = "com.andrei1058.bedwars.arena.mapreset.slime.AspAdapter";
+            getLogger().info("Loading restore adapter: " + adapterPath + " ...");
+            RestoreAdapter candidate = (RestoreAdapter) Class.forName(adapterPath).getConstructor(Plugin.class).newInstance(this);
+            api.setRestoreAdapter(candidate);
+            getLogger().info("Hook into " + candidate.getDisplayName() + " as restore adapter.");
+            return true;
+        } catch (ClassNotFoundException ignored) {
+            // not an ASP 4 server
+        } catch (Exception e) {
+            e.printStackTrace();
+            this.getLogger().info("Could not hook into Advanced Slime Paper 4, trying other adapters...");
+        }
+
         Plugin swmPlugin = Bukkit.getPluginManager().getPlugin("SlimeWorldManager");
 
         if (null == swmPlugin) {

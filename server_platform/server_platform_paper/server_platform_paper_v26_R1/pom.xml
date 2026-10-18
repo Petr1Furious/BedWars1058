@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.andrei1058.bedwars.platform.paper</groupId>
+        <artifactId>server_platform_paper</artifactId>
+        <version>25.5-SNAPSHOT</version>
+    </parent>
+
+    <!--
+        Minecraft 26.x (Paper / AdvancedSlimePaper). The server is unobfuscated from 26.1 on and Paper
+        no longer remaps plugins, so this module uses Mojang names directly. It compiles against the
+        patched server jar plus its libraries merged into one artifact (local.aspaper:server-bundle),
+        which is installed locally from a server directory by scripts/install-server-bundle.sh.
+    -->
+    <artifactId>server_platform_paper_v26_R1</artifactId>
+    <packaging>jar</packaging>
+
+    <properties>
+        <maven.compiler.release>25</maven.compiler.release>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>local.aspaper</groupId>
+            <artifactId>server-bundle</artifactId>
+            <version>${mc}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.andrei1058.bedwars</groupId>
+            <artifactId>bedwars-api</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.andrei1058.bedwars.platform.paper</groupId>
+            <artifactId>server_platform_paper_common</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.andrei1058.bedwars</groupId>
+            <artifactId>versionsupport-common</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.andrei1058.spigot.sidebar</groupId>
+            <artifactId>sidebar-base</artifactId>
+            <version>25.3</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <release>25</release>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

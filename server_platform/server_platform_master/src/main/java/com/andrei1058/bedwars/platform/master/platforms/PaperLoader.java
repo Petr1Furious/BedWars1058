@@ -29,7 +29,19 @@ public class PaperLoader implements IPlatformLoader {
     public boolean isPlatformSupported() {
         var brandId = buildInfos.get(BuildInfo.BRAND_ID).toString();
         var brandName = buildInfos.get(BuildInfo.BRAND_NAME).toString();
-        return brandId.equals("papermc:paper") && brandName.equals("Paper");
+        // forks such as AdvancedSlimePaper report their own brand but declare themselves Paper-compatible
+        return (brandId.equals("papermc:paper") && brandName.equals("Paper"))
+                || Boolean.TRUE.equals(buildInfos.get(BuildInfo.PAPER_COMPATIBLE));
+    }
+
+    /**
+     * Minecraft 26.x (the first year-based versions) all share one unobfuscated platform module.
+     */
+    private @org.jetbrains.annotations.Nullable String getMapping(String version) {
+        if (version.startsWith("26.")) {
+            return "v26_R1";
+        }
+        return versionMappings.get(version);
     }
 
     @Override
@@ -37,12 +49,12 @@ public class PaperLoader implements IPlatformLoader {
         var mcVersionId = buildInfos.get(BuildInfo.MINECRAFT_VERSION_ID).toString();
         var mcVersionName = buildInfos.get(BuildInfo.MINECRAFT_VERSION_NAME).toString();
 
-        return versionMappings.containsKey(mcVersionId) && versionMappings.containsKey(mcVersionName);
+        return getMapping(mcVersionId) != null && getMapping(mcVersionName) != null;
     }
 
     @Override
     public ServerPlatform getSupport() {
-        String classPath = "com.andrei1058.bedwars.platform.paper."+versionMappings.get(
+        String classPath = "com.andrei1058.bedwars.platform.paper."+getMapping(
                 buildInfos.get(BuildInfo.MINECRAFT_VERSION_ID).toString()
         );
 
@@ -66,21 +78,29 @@ public class PaperLoader implements IPlatformLoader {
             var buildMethod = buildInfoHolder.getMethod("buildInfo");
             var build = buildMethod.invoke(null);
 
-            var buildIdMethod = build.getClass().getMethod("brandId");
+            var buildIdMethod = buildInfoHolder.getMethod("brandId");
             var brandId = buildIdMethod.invoke(build);
             buildInfo.put(BuildInfo.BRAND_ID, brandId);
 
-            var brandNameMethod = build.getClass().getMethod("brandName");
+            var brandNameMethod = buildInfoHolder.getMethod("brandName");
             var brandName = brandNameMethod.invoke(build);
             buildInfo.put(BuildInfo.BRAND_NAME, brandName);
 
-            var minecraftVersionMethod = build.getClass().getMethod("minecraftVersionId");
+            var minecraftVersionMethod = buildInfoHolder.getMethod("minecraftVersionId");
             var minecraftVersion = minecraftVersionMethod.invoke(build);
             buildInfo.put(BuildInfo.MINECRAFT_VERSION_ID, minecraftVersion);
 
-            var minecraftVersionNameMethod = build.getClass().getMethod("minecraftVersionName");
+            var minecraftVersionNameMethod = buildInfoHolder.getMethod("minecraftVersionName");
             var minecraftVersionName = minecraftVersionNameMethod.invoke(build);
             buildInfo.put(BuildInfo.MINECRAFT_VERSION_NAME, minecraftVersionName);
+
+            try {
+                var paperId = buildInfoHolder.getField("BRAND_PAPER_ID").get(null);
+                var compatible = buildInfoHolder.getMethod("isBrandCompatible", Class.forName("net.kyori.adventure.key.Key"))
+                        .invoke(build, paperId);
+                buildInfo.put(BuildInfo.PAPER_COMPATIBLE, compatible);
+            } catch (ReflectiveOperationException ignored) {
+            }
 
         } catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException | IllegalAccessException ignored) {
         }

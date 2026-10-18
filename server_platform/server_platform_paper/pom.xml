@@ -15,11 +15,20 @@
 
     <modules>
         <module>server_platform_paper_common</module>
-        <module>server_platform_paper_v1_21_R1</module>
-        <module>server_platform_paper_v1_21_R2</module>
-        <module>server_platform_paper_v1_21_R3</module>
-        <module>server_platform_paper_v1_21_R4</module>
+        <module>server_platform_paper_v26_R1</module>
     </modules>
+
+    <profiles>
+        <profile>
+            <id>legacy</id>
+            <modules>
+                <module>server_platform_paper_v1_21_R1</module>
+                <module>server_platform_paper_v1_21_R2</module>
+                <module>server_platform_paper_v1_21_R3</module>
+                <module>server_platform_paper_v1_21_R4</module>
+            </modules>
+        </profile>
+    </profiles>
 
     <properties>
         <maven.compiler.source>22</maven.compiler.source>

@@ -133,6 +133,8 @@ public class ConfigPath {
     public static final String GENERAL_CONFIGURATION_ARENA_GROUPS = "arenaGroups";
     public static final String GENERAL_CONFIGURATION_REJOIN_TIME = "rejoin-time";
     public static final String GENERAL_CONFIGURATION_RE_SPAWN_INVULNERABILITY = "re-spawn-invulnerability";
+    /** Throw ender pearls straight along the look direction, without the thrower's momentum (pre-1.21.2 behaviour). */
+    public static final String GENERAL_CONFIGURATION_PEARL_IGNORE_MOMENTUM = "ender-pearl-ignore-thrower-momentum";
 
     public static final String GENERAL_CONFIGURATION_SHOUT_COOLDOWN = "shout-cmd-cooldown";
 

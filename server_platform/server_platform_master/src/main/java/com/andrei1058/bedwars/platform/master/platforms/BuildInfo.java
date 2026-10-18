@@ -6,4 +6,5 @@ public enum BuildInfo {
     BRAND_NAME,
     MINECRAFT_VERSION_ID,
     MINECRAFT_VERSION_NAME,
+    PAPER_COMPATIBLE,
 }

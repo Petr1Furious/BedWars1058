@@ -14,6 +14,10 @@
 
     <repositories>
         <repository>
+            <id>bundled-libs</id>
+            <url>file://${maven.multiModuleProjectDirectory}/libs/repo</url>
+        </repository>
+        <repository>
             <id>placeholderapi</id>
             <url>https://repo.extendedclip.com/content/repositories/placeholderapi/</url>
         </repository>
@@ -49,10 +53,6 @@
         <repository>
             <id>alessioDP-releases</id>
             <url>https://repo.alessiodp.com/releases/</url>
-        </repository>
-        <repository>
-            <id>andrei1058-releases</id>
-            <url>https://repo.andrei1058.dev/releases/</url>
         </repository>
         <repository>
             <id>citizens-repo</id>
@@ -136,66 +136,6 @@
         </dependency>
         <dependency>
             <groupId>com.andrei1058.bedwars</groupId>
-            <artifactId>versionsupport_1_8_R3</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.andrei1058.bedwars</groupId>
-            <artifactId>resetadapter-slime</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.andrei1058.bedwars</groupId>
-            <artifactId>versionsupport_1_12_R1</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.andrei1058.bedwars</groupId>
-            <artifactId>versionsupport_v1_16_R3</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.andrei1058.bedwars</groupId>
-            <artifactId>versionsupport_v1_17_R1</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.andrei1058.bedwars</groupId>
-            <artifactId>versionsupport_v1_18_R2</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.andrei1058.bedwars</groupId>
-            <artifactId>versionsupport_v1_19_R2</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.andrei1058.bedwars</groupId>
-            <artifactId>versionsupport_v1_19_R3</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.andrei1058.bedwars</groupId>
-            <artifactId>versionsupport_v1_20_R1</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.andrei1058.bedwars</groupId>
-            <artifactId>versionsupport_v1_20_R2</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.andrei1058.bedwars</groupId>
-            <artifactId>versionsupport_v1_20_R3</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.andrei1058.bedwars</groupId>
-            <artifactId>versionsupport_v1_20_R4</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.andrei1058.bedwars</groupId>
             <artifactId>versionsupport-common</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -214,7 +154,7 @@
         <dependency>
             <groupId>com.andrei1058.vipfeatures</groupId>
             <artifactId>vipfeatures-api</artifactId>
-            <version>[1.0,)</version>
+            <version>1.3.0</version>
             <optional>true</optional>
         </dependency>
         <!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
@@ -244,99 +184,23 @@
             <version>2.0.7</version>
             <optional>true</optional>
         </dependency>
-
-        <!--        Sidebar LIB-->
+        <!-- Sidebar LIB (vendored, see sidebar_base) -->
         <dependency>
             <groupId>com.andrei1058.spigot.sidebar</groupId>
             <artifactId>sidebar-base</artifactId>
             <version>25.3</version>
             <scope>compile</scope>
         </dependency>
-        <dependency>
-            <groupId>com.andrei1058.spigot.sidebar</groupId>
-            <artifactId>sidebar-v1_8_R3</artifactId>
-            <version>25.3</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.andrei1058.spigot.sidebar</groupId>
-            <artifactId>sidebar-v1_12_R1</artifactId>
-            <version>25.3</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.andrei1058.spigot.sidebar</groupId>
-            <artifactId>sidebar-v1_16_R3</artifactId>
-            <version>25.3</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.andrei1058.spigot.sidebar</groupId>
-            <artifactId>sidebar-v1_17_R1</artifactId>
-            <version>25.3</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.andrei1058.spigot.sidebar</groupId>
-            <artifactId>sidebar-v1_18_R2</artifactId>
-            <version>25.3</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.andrei1058.spigot.sidebar</groupId>
-            <artifactId>sidebar-v1_19_R2</artifactId>
-            <version>25.3</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.andrei1058.spigot.sidebar</groupId>
-            <artifactId>sidebar-v1_19_R3</artifactId>
-            <version>25.3</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.andrei1058.spigot.sidebar</groupId>
-            <artifactId>sidebar-v1_20_R1</artifactId>
-            <version>25.3</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.andrei1058.spigot.sidebar</groupId>
-            <artifactId>sidebar-v1_20_R2</artifactId>
-            <version>25.3</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.andrei1058.spigot.sidebar</groupId>
-            <artifactId>sidebar-v1_20_R3</artifactId>
-            <version>25.3</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.andrei1058.spigot.sidebar</groupId>
-            <artifactId>sidebar-v1_20_R4</artifactId>
-            <version>25.3</version>
-            <scope>compile</scope>
-        </dependency>
-        <!--        End of Sidebar LIB-->
-        <!-- Slime Paper -->
+        <!-- Advanced Slime Paper 4.x (26.x) -->
         <dependency>
             <groupId>com.andrei1058.bedwars</groupId>
-            <artifactId>resetadapter-slimepaper</artifactId>
+            <artifactId>resetadapter-asp</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <!-- Slime Paper -->
-        <dependency>
-            <groupId>com.andrei1058.bedwars</groupId>
-            <artifactId>resetadapter-aswm</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <!-- End of Slime Paper -->
-
         <dependency>
             <groupId>net.md-5</groupId>
             <artifactId>bungeecord-chat</artifactId>
-            <version>1.18-R0.1-SNAPSHOT</version>
+            <version>1.21-R0.4</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -359,43 +223,7 @@
         </dependency>
         <dependency>
             <groupId>com.andrei1058.bedwars.platform.paper</groupId>
-            <artifactId>server_platform_paper_v1_21_R1</artifactId>
-            <version>${project.version}</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.andrei1058.bedwars.platform.paper</groupId>
-            <artifactId>server_platform_paper_v1_21_R2</artifactId>
-            <version>${project.version}</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.andrei1058.bedwars.platform.paper</groupId>
-            <artifactId>server_platform_paper_v1_21_R3</artifactId>
-            <version>${project.version}</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.andrei1058.bedwars.platform.paper</groupId>
-            <artifactId>server_platform_paper_v1_21_R4</artifactId>
-            <version>${project.version}</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.andrei1058.bedwars.platform.spigot</groupId>
-            <artifactId>server_platform_spigot_common</artifactId>
-            <version>${project.version}</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.andrei1058.bedwars.platform.spigot</groupId>
-            <artifactId>server_platform_spigot_v1_21_R1</artifactId>
-            <version>${project.version}</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.andrei1058.bedwars.platform.spigot</groupId>
-            <artifactId>server_platform_spigot_v1_21_R4</artifactId>
+            <artifactId>server_platform_paper_v26_R1</artifactId>
             <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>
@@ -415,7 +243,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>3.5.0</version>
+                <version>3.6.2</version>
                 <configuration>
                     <relocations>
                         <relocation>

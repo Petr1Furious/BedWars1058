@@ -18,8 +18,8 @@
             <url>https://repo.codemc.io/repository/nms/</url>
         </repository>
         <repository>
-            <id>andrei-releases</id>
-            <url>https://repo.andrei1058.dev/releases</url>
+            <id>spigot-hub</id>
+            <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
         </repository>
     </repositories>
 
@@ -38,7 +38,7 @@
         </dependency>
         <dependency>
             <groupId>org.spigotmc</groupId>
-            <artifactId>spigot</artifactId>
+            <artifactId>spigot-api</artifactId>
             <version>1.14.4-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
