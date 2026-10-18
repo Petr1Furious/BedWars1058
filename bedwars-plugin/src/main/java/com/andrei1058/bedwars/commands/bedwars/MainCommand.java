@@ -200,10 +200,12 @@ public class MainCommand extends BukkitCommand implements ParentCommand {
                 if (sb.canSee(s, BedWars.getAPI())) sub.add(sb.getSubCommandName());
             }
             return sub;
-        } else if (args.length == 2) {
+        } else if (args.length >= 2) {
             if (hasSubCommand(args[0])) {
-                if (getSubCommand(args[0]).canSee(s, BedWars.getAPI()))
-                    return getSubCommand(args[0]).getTabComplete();
+                SubCommand sub = getSubCommand(args[0]);
+                if (sub.canSee(s, BedWars.getAPI())) {
+                    return sub.getTabComplete(s, Arrays.copyOfRange(args, 1, args.length));
+                }
             }
         }
         return null;

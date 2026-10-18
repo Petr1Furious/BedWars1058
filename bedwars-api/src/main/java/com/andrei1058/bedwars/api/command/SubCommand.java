@@ -167,4 +167,16 @@ public abstract class SubCommand {
      * Manage sub-command tab complete
      */
     public abstract List<String> getTabComplete();
+
+    /**
+     * Tab completion for any argument after the sub-command name.
+     * Override for sub-commands that take more than one argument.
+     *
+     * @param sender who is completing.
+     * @param args   arguments after the sub-command name; the last one is the one being completed.
+     * @return suggestions, filtered by the caller against the last argument, or null for none.
+     */
+    public List<String> getTabComplete(CommandSender sender, String[] args) {
+        return args.length == 1 ? getTabComplete() : null;
+    }
 }

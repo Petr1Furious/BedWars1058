@@ -33,14 +33,17 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.util.StringUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 /**
@@ -203,11 +206,51 @@ public class AddPlayer extends SubCommand {
         tab.add("random");
         if (BedWars.config.getYml().get("arenaGroups") != null) {
             tab.addAll(BedWars.config.getYml().getStringList("arenaGroups"));
+        } else {
+            tab.add("Default"); // the only group when none are configured, see MainCommand#isArenaGroup
         }
         for (IArena arena : Arena.getArenas()) {
-            tab.add(arena.getArenaName());
+            if (!tab.contains(arena.getArenaName())) {
+                tab.add(arena.getArenaName());
+            }
         }
         return tab;
+    }
+
+    private static final String[] SELECTORS = {"@a", "@p", "@r", "@s"};
+
+    /**
+     * First argument: arenas, groups and {@code random}. Every later one: online players not typed yet,
+     * the selectors and {@code -f}.
+     */
+    @Override
+    public List<String> getTabComplete(CommandSender sender, String[] args) {
+        String current = args[args.length - 1];
+        if (args.length == 1) {
+            return StringUtil.copyPartialMatches(current, getTabComplete(), new ArrayList<>());
+        }
+        Set<String> typed = new HashSet<>();
+        for (int i = 1; i < args.length - 1; i++) {
+            typed.add(args[i].toLowerCase(Locale.ROOT));
+        }
+        List<String> tab = new ArrayList<>();
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            if (sender instanceof Player && !((Player) sender).canSee(player)) {
+                continue;
+            }
+            if (!typed.contains(player.getName().toLowerCase(Locale.ROOT))) {
+                tab.add(player.getName());
+            }
+        }
+        for (String selector : SELECTORS) {
+            if (!typed.contains(selector)) {
+                tab.add(selector);
+            }
+        }
+        if (!typed.contains("-f") && !typed.contains("--force")) {
+            tab.add("-f");
+        }
+        return StringUtil.copyPartialMatches(current, tab, new ArrayList<>());
     }
 
     @Override
