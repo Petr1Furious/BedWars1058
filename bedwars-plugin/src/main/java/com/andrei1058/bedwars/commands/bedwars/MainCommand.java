@@ -87,6 +87,7 @@ public class MainCommand extends BukkitCommand implements ParentCommand {
         new com.andrei1058.bedwars.commands.bedwars.subcmds.sensitive.Build(this, "build"); //priority 9
         new Level(this, "level");
         new Reload(this, "reload"); //priority 11
+        new com.andrei1058.bedwars.commands.bedwars.subcmds.sensitive.AddPlayer(this, "addPlayer");
         new CmdList(this, "cmds"); //priority 20
 
         /* Arena setup commands (in world) */
