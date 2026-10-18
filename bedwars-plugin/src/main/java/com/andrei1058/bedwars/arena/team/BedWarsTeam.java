@@ -485,12 +485,17 @@ public class BedWarsTeam implements ITeam {
      * Equip a player with default armor
      */
     public void sendArmor(Player p) {
-        if (p.getInventory().getHelmet() == null) p.getInventory().setHelmet(createArmor(Material.LEATHER_HELMET));
-        if (p.getInventory().getChestplate() == null)
+        // Paper 26.x returns an empty (AIR) stack for an empty armour slot instead of null
+        if (isEmpty(p.getInventory().getHelmet())) p.getInventory().setHelmet(createArmor(Material.LEATHER_HELMET));
+        if (isEmpty(p.getInventory().getChestplate()))
             p.getInventory().setChestplate(createArmor(Material.LEATHER_CHESTPLATE));
-        if (p.getInventory().getLeggings() == null)
+        if (isEmpty(p.getInventory().getLeggings()))
             p.getInventory().setLeggings(createArmor(Material.LEATHER_LEGGINGS));
-        if (p.getInventory().getBoots() == null) p.getInventory().setBoots(createArmor(Material.LEATHER_BOOTS));
+        if (isEmpty(p.getInventory().getBoots())) p.getInventory().setBoots(createArmor(Material.LEATHER_BOOTS));
+    }
+
+    private static boolean isEmpty(ItemStack item) {
+        return item == null || item.getType() == Material.AIR || item.getAmount() <= 0;
     }
 
     @Override
