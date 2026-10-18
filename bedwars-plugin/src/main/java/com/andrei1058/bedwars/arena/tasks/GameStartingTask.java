@@ -34,6 +34,7 @@ import com.andrei1058.bedwars.api.tasks.StartingTask;
 import com.andrei1058.bedwars.arena.Arena;
 import com.andrei1058.bedwars.arena.team.BedWarsTeam;
 import com.andrei1058.bedwars.arena.team.LegacyTeamAssigner;
+import com.andrei1058.bedwars.arena.team.TeamBalancer;
 import com.andrei1058.bedwars.configuration.Sounds;
 import com.andrei1058.bedwars.support.papi.SupportPAPI;
 import org.bukkit.Bukkit;
@@ -98,6 +99,9 @@ public class GameStartingTask implements Runnable, StartingTask {
             } else {
                 LegacyTeamAssigner.assignTeams(getArena());
             }
+            // whatever assigner ran (built-in or an add-on's), spread players without a choice evenly
+            // and never start with everybody in one team
+            TeamBalancer.balance(getArena());
 
             //Color bed block if possible
             //Destroy bed if team is empty

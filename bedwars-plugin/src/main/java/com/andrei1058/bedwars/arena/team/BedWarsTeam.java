@@ -140,6 +140,17 @@ public class BedWarsTeam implements ITeam {
     }
 
     /**
+     * Take a player out of this team before the game has started, undoing {@link #addPlayers(Player...)}.
+     * Used by {@link TeamBalancer} to move players between teams after assignment.
+     */
+    public void unassignPlayer(@NotNull Player p) {
+        members.removeIf(player -> player.getUniqueId().equals(p.getUniqueId()));
+        membersCache.removeIf(player -> player.getUniqueId().equals(p.getUniqueId()));
+        destroyBedHolo(p);
+        getBeds().remove(p.getUniqueId());
+    }
+
+    /**
      * first spawn
      */
     public void firstSpawn(Player p) {
