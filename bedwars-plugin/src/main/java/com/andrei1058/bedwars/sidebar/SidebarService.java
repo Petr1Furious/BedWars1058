@@ -72,7 +72,8 @@ public class SidebarService implements ISidebarService {
                     log.warning("Scoreboard title refresh interval is set to: " + titleRefreshInterval);
                     log.warning("If you expect performance issues please increase its timer.");
                 }
-                Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, new RefreshTitleTask(), 1L, titleRefreshInterval);
+                // sync: sidebars and their receivers are only safe to touch from the main thread
+                Bukkit.getScheduler().runTaskTimer(plugin, new RefreshTitleTask(), 1L, titleRefreshInterval);
             }
             MetricsManager.appendPie("sb_title_refresh_interval", () -> String.valueOf(titleRefreshInterval));
 
@@ -254,37 +255,59 @@ public class SidebarService implements ISidebarService {
         return sidebarHandler;
     }
 
+    /**
+     * Runs the action for every sidebar, isolating failures: one broken sidebar (a placeholder throwing,
+     * a player that just left) used to abort the whole loop, so everyone after it in the map silently
+     * stopped getting updates until the next state change.
+     */
+    private void forEachSidebar(java.util.function.Consumer<BwSidebar> action) {
+        for (BwSidebar sidebar : new ArrayList<>(this.sidebars.values())) {
+            if (null == sidebar || null == sidebar.getHandle()) {
+                continue;
+            }
+            try {
+                action.accept(sidebar);
+            } catch (Exception e) {
+                BedWars.plugin.getLogger().log(java.util.logging.Level.WARNING,
+                        "Could not refresh the sidebar of " + sidebar.getPlayer().getName(), e);
+            }
+        }
+    }
+
     public void refreshTitles() {
-        this.sidebars.forEach((k, v) -> v.getHandle().refreshTitle());
+        forEachSidebar(v -> {
+            v.getHandle().refreshTitle();
+            // comma separated (animated) lines were never advanced anywhere else
+            v.getHandle().refreshAnimatedLines();
+        });
     }
 
     public void refreshPlaceholders() {
-        this.sidebars.forEach((k, v) -> v.getHandle().refreshPlaceholders());
+        forEachSidebar(v -> v.getHandle().refreshPlaceholders());
     }
 
     public void refreshPlaceholders(IArena arena) {
-        this.sidebars.forEach((k, v) -> {
-            if (v.getArena() != null)
-                if (v.getArena().equals(arena)) {
-                    v.getHandle().refreshPlaceholders();
-                }
+        forEachSidebar(v -> {
+            if (v.getArena() != null && v.getArena().equals(arena)) {
+                v.getHandle().refreshPlaceholders();
+            }
         });
     }
 
     public void refreshTabList() {
-        this.sidebars.forEach((k, v) -> v.getHandle().playerTabRefreshAnimation());
+        forEachSidebar(v -> v.getHandle().playerTabRefreshAnimation());
     }
 
     public void refreshTabHeaderFooter() {
-        this.sidebars.forEach((k, v) -> {
-            if (null != v && null != v.getHeaderFooter()) {
+        forEachSidebar(v -> {
+            if (null != v.getHeaderFooter()) {
                 this.sidebarHandler.sendHeaderFooter(v.getPlayer(), v.getHeaderFooter());
             }
         });
     }
 
     public void refreshHealth() {
-        this.sidebars.forEach((k, v) -> {
+        forEachSidebar(v -> {
             if (null != v.getArena()) {
                 v.getHandle().playerHealthRefreshAnimation();
                 for (Player player : v.getArena().getPlayers()) {
@@ -300,7 +323,7 @@ public class SidebarService implements ISidebarService {
     }
 
     public void refreshHealth(IArena arena, Player player, int health) {
-        this.sidebars.forEach((k, v) -> {
+        forEachSidebar(v -> {
             if (null != v.getArena() && v.getArena().equals(arena)) {
                 v.getHandle().setPlayerHealth(player, health);
             }

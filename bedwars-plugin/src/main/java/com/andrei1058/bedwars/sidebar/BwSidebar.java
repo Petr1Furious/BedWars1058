@@ -49,6 +49,9 @@ public class BwSidebar implements ISidebar {
 
     private final BwTabList tabList;
 
+    // bumped on every content change, see setContent
+    private int contentGeneration = 0;
+
     public @Nullable StatisticsOrdered topStatistics;
 
     protected BwSidebar(Player player) {
@@ -68,6 +71,7 @@ public class BwSidebar implements ISidebar {
     }
 
     public void remove() {
+        contentGeneration++;
         if (handle == null) {
             return;
         }
@@ -94,11 +98,20 @@ public class BwSidebar implements ISidebar {
             handle.add(player);
         } else {
             handle.clearLines();
+            // giveSidebar is often called several times in a row (join + state change + team assignment).
+            // Only the latest content may be applied, otherwise an older task re-adds stale lines after
+            // the newer ones (or runs out of the 16 line slots) and the sidebar stays outdated.
+            final int generation = ++contentGeneration;
             Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                if (generation != contentGeneration || handle == null) {
+                    return;
+                }
+                handle.clearLines();
                 new ArrayList<>(handle.getPlaceholders()).forEach(p -> handle.removePlaceholder(p.getPlaceholder()));
                 placeholders.forEach(p -> handle.addPlaceholder(p));
                 handle.setTitle(title);
                 lines.forEach(l -> handle.addLine(l));
+                handle.refreshPlaceholders();
             }, 2L);
         }
         tabList.handlePlayerList();
