@@ -43,6 +43,7 @@ public class Messages {
     public static String NEXT_EVENT_TITLE_ANNOUNCE_SUDDEN_DEATH = "next-event-sudden-death-title";
     public static String NEXT_EVENT_SUBTITLE_ANNOUNCE_SUDDEN_DEATH = "next-event-sudden-death-sub-title";
     public static String NEXT_EVENT_CHAT_ANNOUNCE_SUDDEN_DEATH = "next-event-sudden-death-chat";
+    public static String NEXT_EVENT_CHAT_ANNOUNCE_EXTRA_DRAGON = "next-event-extra-dragon-chat";
 
     /**
      * General commands reply
@@ -439,6 +440,7 @@ public class Messages {
     public static String SHOP_UTILITY_NPC_IRON_GOLEM_NAME = "shop-utility-iron-golem";
     public static String SHOP_INSUFFICIENT_MONEY = "shop-insuff-money";
     public static String SHOP_ALREADY_BOUGHT = "shop-already-bought";
+    public static String SHOP_REQUIRES_ENEMY_BEDS_DESTROYED = "shop-requires-enemy-beds-destroyed";
     public static final String SHOP_PATH = "shop-items-messages";
     public static final String SHOP_LORE_STATUS_CANT_AFFORD = "shop-lore-status-cant-afford";
     public static final String SHOP_LORE_STATUS_CAN_BUY = "shop-lore-status-can-buy";

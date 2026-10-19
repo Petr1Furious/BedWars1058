@@ -785,6 +785,7 @@ public class Russian extends Language{
         yml.addDefault(Messages.SHOP_INSUFFICIENT_MONEY, "{prefix}&cТебе нехватает {currency}! Нужно еще {amount}!");
         yml.addDefault(Messages.SHOP_NEW_PURCHASE, "{prefix}&aТы купил &6{item}");
         yml.addDefault(Messages.SHOP_ALREADY_BOUGHT, "{prefix}&cТы уже купил это!");
+        yml.addDefault(Messages.SHOP_REQUIRES_ENEMY_BEDS_DESTROYED, "{prefix}&cЭто можно купить только когда все вражеские кровати разрушены!");
         yml.addDefault(Messages.SHOP_QUICK_ADD_NAME, "&8Добавление в быструю покупку...");
         yml.addDefault(Messages.SHOP_UTILITY_NPC_SILVERFISH_NAME, "{TeamColor}&l{TeamName} &r{TeamColor}Silverfish");
         yml.addDefault(Messages.SHOP_UTILITY_NPC_IRON_GOLEM_NAME, "{TeamColor}{despawn}s &8[ {TeamColor}{health}&8]");
@@ -873,6 +874,7 @@ public class Russian extends Language{
                 "&7поставленных на базу противника, в течении 60 секунд.", "", "{quick_buy}", "{buy_status}"));
         addContentMessages(yml, "sponge", ConfigPath.SHOP_PATH_CATEGORY_UTILITY, "{color}Губка", Arrays.asList("&7Cost: {cost} {currency}", "", "&7Вжимает в себя воду.",
                 "", "{quick_buy}", "{buy_status}"));
+        addContentMessages(yml, "tracker", ConfigPath.SHOP_PATH_CATEGORY_UTILITY, "{color}Компас-трекер", Arrays.asList("&7Cost: {cost} {currency}", "", "&7Указывает на ближайшего врага.", "&7Доступен, когда все", "&7вражеские кровати разрушены.", "", "{quick_buy}", "{buy_status}"));
 
 
         yml.addDefault(Messages.MEANING_FULL, "Полный");
@@ -1009,6 +1011,7 @@ public class Russian extends Language{
         yml.addDefault(Messages.NEXT_EVENT_TITLE_ANNOUNCE_SUDDEN_DEATH, "&cСмерть");
         yml.addDefault(Messages.NEXT_EVENT_SUBTITLE_ANNOUNCE_SUDDEN_DEATH, "");
         yml.addDefault(Messages.NEXT_EVENT_CHAT_ANNOUNCE_SUDDEN_DEATH, "&cСМЕРТЬ: &6&b{TeamDragons} {TeamColor}{TeamName} Dragon!");
+        yml.addDefault(Messages.NEXT_EVENT_CHAT_ANNOUNCE_EXTRA_DRAGON, "&cСМЕРТЬ: &fКаждая команда получает ещё одного дракона!");
         yml.addDefault(Messages.COMMAND_NOT_FOUND_OR_INSUFF_PERMS, "{prefix}&cКоманда не найдена или у вас нет прав!");
         yml.addDefault(Messages.COMMAND_FORCESTART_NOT_IN_GAME, "§c▪ §7Вы не играете!");
         yml.addDefault(Messages.COMMAND_FORCESTART_SUCCESS, "§c▪ §7Обратный отсчет сокращен!");
@@ -1103,6 +1106,11 @@ public class Russian extends Language{
         yml.addDefault(Messages.UPGRADES_UPGRADE_TIER_ITEM_NAME.replace("{name}", "heal-pool").replace("{tier}", "tier-1"), "{color}Исцеляющее Поле");
         yml.addDefault(Messages.UPGRADES_UPGRADE_TIER_ITEM_LORE.replace("{name}", "heal-pool"),
                 Arrays.asList("&7Создаёт исцеляющее поле", "&7вокруг вашей базы!", "", "{tier_1_color}Цена: &b{tier_1_cost} {tier_1_currency}", ""));
+        yml.addDefault(Messages.UPGRADES_UPGRADE_TIER_ITEM_NAME.replace("{name}", "cushioned-boots").replace("{tier}", "tier-1"), "{color}Мягкие Ботинки I");
+        yml.addDefault(Messages.UPGRADES_UPGRADE_TIER_ITEM_NAME.replace("{name}", "cushioned-boots").replace("{tier}", "tier-2"), "{color}Мягкие Ботинки II");
+        yml.addDefault(Messages.UPGRADES_UPGRADE_TIER_ITEM_LORE.replace("{name}", "cushioned-boots"),
+                Arrays.asList("&7Ботинки вашей команды получают", "&7Невесомость!", "", "{tier_1_color}Фаза 1: Невесомость I, &b{tier_1_cost} {tier_1_currency}",
+                        "{tier_2_color}Фаза 2: Невесомость II, &b{tier_2_cost} {tier_2_currency}", ""));
         yml.addDefault(Messages.UPGRADES_UPGRADE_TIER_ITEM_NAME.replace("{name}", "dragon").replace("{tier}", "tier-1"), "{color}Драконы");
         yml.addDefault(Messages.UPGRADES_UPGRADE_TIER_ITEM_LORE.replace("{name}", "dragon"),
                 Arrays.asList("&7Ваша команда будет иметь 2 драконов,", "&7вместо 1 во время конца игры!", "", "{tier_1_color}Цена: &b{tier_1_cost} {tier_1_currency}", ""));
@@ -1121,9 +1129,9 @@ public class Russian extends Language{
         yml.addDefault(Messages.UPGRADES_TRAP_SLOT_ITEM_LORE2_PATH + "third",
                 Arrays.asList("", "&7Покупка ловушки,", "&7добавит её в очередь. Её цена", "&7будет увеличиваться по мере", "&7числа купленных ловушек.", "", "&7Следущяя ловушка: &b{cost} {currency}"));
         yml.addDefault(Messages.UPGRADES_BASE_TRAP_ITEM_NAME_PATH + "1", "{color}Это ловушка!");
-        yml.addDefault(Messages.UPGRADES_BASE_TRAP_ITEM_LORE_PATH + "1", Arrays.asList("&7Накладывает Слепоту и Медлительность", "&7на 5 секунд.", ""));
+        yml.addDefault(Messages.UPGRADES_BASE_TRAP_ITEM_LORE_PATH + "1", Arrays.asList("&7Накладывает Слепоту и Медлительность", "&7на 8 секунд.", ""));
         yml.addDefault(Messages.UPGRADES_BASE_TRAP_ITEM_NAME_PATH + "2", "{color}Ловушка-Помощник");
-        yml.addDefault(Messages.UPGRADES_BASE_TRAP_ITEM_LORE_PATH + "2", Arrays.asList("&7Даёт вам и вашим союзникам", "&7скорость I на 15 секунд.", ""));
+        yml.addDefault(Messages.UPGRADES_BASE_TRAP_ITEM_LORE_PATH + "2", Arrays.asList("&7Даёт вам и вашим союзникам", "&7Скорость II и Прыгучесть II", "&7на 15 секунд.", ""));
         yml.addDefault(Messages.UPGRADES_BASE_TRAP_ITEM_NAME_PATH + "3", "{color}Ловушка с Тревогой");
         yml.addDefault(Messages.UPGRADES_BASE_TRAP_ITEM_LORE_PATH + "3", Arrays.asList("&7Показывает игроков, которые были", "&7с зельем невидимости.", ""));
         yml.addDefault(Messages.UPGRADES_BASE_TRAP_ITEM_NAME_PATH + "4", "{color}Ловушка Медленный Шахтёр");

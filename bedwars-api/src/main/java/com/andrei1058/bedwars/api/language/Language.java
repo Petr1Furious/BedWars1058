@@ -192,7 +192,9 @@ public class Language extends ConfigManager {
     public static void saveIfNotExists(String path, Object data) {
         for (Language l : languages) {
             if (l.getYml().get(path) == null) {
-                l.set(path, data);
+                // prefer the default language text over a placeholder
+                Object fallback = getDefaultLanguage() == null ? null : getDefaultLanguage().getYml().get(path);
+                l.set(path, fallback == null ? data : fallback);
             }
         }
     }
@@ -202,6 +204,10 @@ public class Language extends ConfigManager {
      */
     public String m(String path) {
         String message = getYml().getString(path);
+        if (message == null && getDefaultLanguage() != null && getDefaultLanguage() != this) {
+            // keys added after a translation was written fall back to the server default language
+            message = getDefaultLanguage().getYml().getString(path);
+        }
         if (message == null) {
             System.err.println("Missing message key " + path + " in language " + getIso());
             message = "MISSING_LANG";
@@ -226,6 +232,9 @@ public class Language extends ConfigManager {
     public List<String> l(String path) {
         List<String> result = new ArrayList<>();
         List<String> lines = getYml().getStringList(path);
+        if ((lines == null || lines.isEmpty()) && !getYml().isSet(path) && getDefaultLanguage() != null && getDefaultLanguage() != this) {
+            lines = getDefaultLanguage().getYml().getStringList(path);
+        }
         if (lines == null) {
             System.err.println("Missing message list key " + path + " in language " + getIso());
             lines = Collections.emptyList();

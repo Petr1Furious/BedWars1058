@@ -22,6 +22,7 @@ package com.andrei1058.bedwars.shop.main;
 
 import com.andrei1058.bedwars.BedWars;
 import com.andrei1058.bedwars.api.arena.IArena;
+import com.andrei1058.bedwars.api.arena.team.ITeam;
 import com.andrei1058.bedwars.api.arena.shop.IBuyItem;
 import com.andrei1058.bedwars.api.arena.shop.ICategoryContent;
 import com.andrei1058.bedwars.api.arena.shop.IContentTier;
@@ -30,6 +31,7 @@ import com.andrei1058.bedwars.api.events.shop.ShopBuyEvent;
 import com.andrei1058.bedwars.api.language.Language;
 import com.andrei1058.bedwars.api.language.Messages;
 import com.andrei1058.bedwars.arena.Arena;
+import com.andrei1058.bedwars.arena.tasks.TrackerCompass;
 import com.andrei1058.bedwars.configuration.Sounds;
 import com.andrei1058.bedwars.shop.ShopCache;
 import com.andrei1058.bedwars.shop.quickbuy.PlayerQuickBuyCache;
@@ -58,6 +60,7 @@ public class CategoryContent implements ICategoryContent {
     private String itemNamePath, itemLorePath;
     private String identifier;
     private boolean permanent = false, downgradable = false, unbreakable = false;
+    private boolean requiresEnemyBedsDestroyed = false;
     private byte weight = 0;
     private ShopCategory father;
 
@@ -102,6 +105,8 @@ public class CategoryContent implements ICategoryContent {
         if (yml.get(path + "." + ConfigPath.SHOP_CATEGORY_CONTENT_IS_UNBREAKABLE) != null) {
             unbreakable = yml.getBoolean(path + "." + ConfigPath.SHOP_CATEGORY_CONTENT_IS_UNBREAKABLE);
         }
+
+        requiresEnemyBedsDestroyed = yml.getBoolean(path + "." + ConfigPath.SHOP_CATEGORY_CONTENT_REQUIRES_ENEMY_BEDS_DESTROYED, false);
 
         if (yml.get(path + "." + ConfigPath.SHOP_CATEGORY_CONTENT_WEIGHT) != null) {
             weight = (byte) yml.getInt(path + "." + ConfigPath.SHOP_CATEGORY_CONTENT_WEIGHT);
@@ -161,6 +166,17 @@ public class CategoryContent implements ICategoryContent {
                 ct = contentTiers.get(0);
             } else {
                 ct = contentTiers.get(shopCache.getContentTier(getIdentifier()));
+            }
+        }
+
+        // e.g. the tracker compass: only once every enemy bed is gone
+        if (requiresEnemyBedsDestroyed) {
+            IArena arena = Arena.getArenaByPlayer(player);
+            ITeam own = arena == null ? null : arena.getTeam(player);
+            if (own == null || !TrackerCompass.allEnemyBedsDestroyed(arena, own)) {
+                player.sendMessage(getMsg(player, Messages.SHOP_REQUIRES_ENEMY_BEDS_DESTROYED));
+                Sounds.playSound(ConfigPath.SOUNDS_INSUFF_MONEY, player);
+                return;
             }
         }
 
@@ -466,6 +482,10 @@ public class CategoryContent implements ICategoryContent {
      */
     public boolean isLoaded() {
         return loaded;
+    }
+
+    public boolean isRequiresEnemyBedsDestroyed() {
+        return requiresEnemyBedsDestroyed;
     }
 
     public boolean isPermanent() {

@@ -37,16 +37,19 @@ public class UpgradesConfig extends ConfigManager {
         super(plugin, name, dir);
         YamlConfiguration yml = this.getYml();
         List<String> elements = Arrays.asList("upgrade-swords,10", "upgrade-armor,11", "upgrade-miner,12", "upgrade-forge,13",
-                "upgrade-heal-pool,14", "upgrade-dragon,15", "category-traps,16", "separator-glass,18,19,20,21,22,23,24,25,26",
+                "upgrade-heal-pool,14", "upgrade-cushioned-boots,15", "category-traps,16", "separator-glass,18,19,20,21,22,23,24,25,26",
                 "trap-slot-first,30", "trap-slot-second,31", "trap-slot-third,32");
         yml.addDefault("default-upgrades-settings.menu-content", elements);
         yml.addDefault("default-upgrades-settings.trap-start-price", 1);
         yml.addDefault("default-upgrades-settings.trap-increment-price", 1);
+        // Hypixel trap prices: 1st, 2nd, 3rd queued trap (overrides start + increment)
+        yml.addDefault("default-upgrades-settings.trap-prices", Arrays.asList(1, 2, 4));
         yml.addDefault("default-upgrades-settings.trap-currency", "diamond");
         yml.addDefault("default-upgrades-settings.trap-queue-limit", 3);
 
         if (isFirstTime()) {
             yml.addDefault("upgrade-swords.tier-1.cost", 4);
+            yml.addDefault("upgrade-swords.tier-1.cost-4s", 8);
             yml.addDefault("upgrade-swords.tier-1.currency", "diamond");
             addDefaultDisplayItem("upgrade-swords.tier-1", "IRON_SWORD", 0, 1, false);
             //noinspection ArraysAsListWithZeroOrOneArgument
@@ -54,64 +57,83 @@ public class UpgradesConfig extends ConfigManager {
 
             yml.addDefault("upgrade-armor.tier-1.currency", "diamond");
             yml.addDefault("upgrade-armor.tier-1.cost", 2);
+            yml.addDefault("upgrade-armor.tier-1.cost-4s", 5);
             addDefaultDisplayItem("upgrade-armor.tier-1", "IRON_CHESTPLATE", 0, 1, false);
             yml.addDefault("upgrade-armor.tier-1.receive", Collections.singletonList("enchant-item: PROTECTION_ENVIRONMENTAL,1,armor"));
 
             yml.addDefault("upgrade-armor.tier-2.currency", "diamond");
             yml.addDefault("upgrade-armor.tier-2.cost", 4);
+            yml.addDefault("upgrade-armor.tier-2.cost-4s", 10);
             addDefaultDisplayItem("upgrade-armor.tier-2", "IRON_CHESTPLATE", 0, 2, false);
             yml.addDefault("upgrade-armor.tier-2.receive", Collections.singletonList("enchant-item: PROTECTION_ENVIRONMENTAL,2,armor"));
 
             yml.addDefault("upgrade-armor.tier-3.currency", "diamond");
             yml.addDefault("upgrade-armor.tier-3.cost", 8);
+            yml.addDefault("upgrade-armor.tier-3.cost-4s", 20);
             addDefaultDisplayItem("upgrade-armor.tier-3", "IRON_CHESTPLATE", 0, 3, false);
             yml.addDefault("upgrade-armor.tier-3.receive", Collections.singletonList("enchant-item: PROTECTION_ENVIRONMENTAL,3,armor"));
 
             yml.addDefault("upgrade-armor.tier-4.currency", "diamond");
             yml.addDefault("upgrade-armor.tier-4.cost", 16);
+            yml.addDefault("upgrade-armor.tier-4.cost-4s", 30);
             addDefaultDisplayItem("upgrade-armor.tier-4", "IRON_CHESTPLATE", 0, 4, false);
             yml.addDefault("upgrade-armor.tier-4.receive", Collections.singletonList("enchant-item: PROTECTION_ENVIRONMENTAL,4,armor"));
 
             yml.addDefault("upgrade-miner.tier-1.currency", "diamond");
             yml.addDefault("upgrade-miner.tier-1.cost", 2);
+            yml.addDefault("upgrade-miner.tier-1.cost-4s", 4);
             addDefaultDisplayItem("upgrade-miner.tier-1", getForCurrentVersion("GOLD_PICKAXE", "GOLD_PICKAXE", "GOLDEN_PICKAXE"), 0, 1, false);
             yml.addDefault("upgrade-miner.tier-1.receive", Collections.singletonList("player-effect: FAST_DIGGING,0,0,team"));
 
             yml.addDefault("upgrade-miner.tier-2.currency", "diamond");
             yml.addDefault("upgrade-miner.tier-2.cost", 4);
+            yml.addDefault("upgrade-miner.tier-2.cost-4s", 6);
             addDefaultDisplayItem("upgrade-miner.tier-2", getForCurrentVersion("GOLD_PICKAXE", "GOLD_PICKAXE", "GOLDEN_PICKAXE"), 0, 2, false);            yml.addDefault("upgrade-miner.tier-2.receive", Collections.singletonList("player-effect: FAST_DIGGING,1,0,team"));
 
             yml.addDefault("upgrade-forge.tier-1.currency", "diamond");
             yml.addDefault("upgrade-forge.tier-1.cost", 2);
+            yml.addDefault("upgrade-forge.tier-1.cost-4s", 4);
             addDefaultDisplayItem("upgrade-forge.tier-1", "FURNACE", 0, 1, false);
             yml.addDefault("upgrade-forge.tier-1.receive", Arrays.asList("generator-edit: iron,2,2,41", "generator-edit: gold,3,1,14"));
 
             yml.addDefault("upgrade-forge.tier-2.currency", "diamond");
             yml.addDefault("upgrade-forge.tier-2.cost", 4);
+            yml.addDefault("upgrade-forge.tier-2.cost-4s", 8);
             addDefaultDisplayItem("upgrade-forge.tier-2", "FURNACE", 0, 2, false);
             yml.addDefault("upgrade-forge.tier-2.receive", Arrays.asList("generator-edit: iron,1,2,48", "generator-edit: gold,3,2,21"));
 
             yml.addDefault("upgrade-forge.tier-3.currency", "diamond");
             yml.addDefault("upgrade-forge.tier-3.cost", 6);
+            yml.addDefault("upgrade-forge.tier-3.cost-4s", 12);
             addDefaultDisplayItem("upgrade-forge.tier-3", "FURNACE", 0, 3, false);
             yml.addDefault("upgrade-forge.tier-3.receive", Arrays.asList("generator-edit: iron,1,2,64", "generator-edit: gold,3,2,29",
                     "generator-edit: emerald,10,1,10"));
 
             yml.addDefault("upgrade-forge.tier-4.currency", "diamond");
             yml.addDefault("upgrade-forge.tier-4.cost", 8);
+            yml.addDefault("upgrade-forge.tier-4.cost-4s", 16);
             addDefaultDisplayItem("upgrade-forge.tier-4", "FURNACE", 0, 4, false);
             yml.addDefault("upgrade-forge.tier-4.receive", Arrays.asList("generator-edit: iron,1,4,120", "generator-edit: gold,2,4,80",
                     "generator-edit: emerald,10,2,20"));
 
             yml.addDefault("upgrade-heal-pool.tier-1.currency", "diamond");
             yml.addDefault("upgrade-heal-pool.tier-1.cost", 1);
+            yml.addDefault("upgrade-heal-pool.tier-1.cost-4s", 3);
             addDefaultDisplayItem("upgrade-heal-pool.tier-1", "BEACON", 0, 1, false);
-            yml.addDefault("upgrade-heal-pool.tier-1.receive", Collections.singletonList("player-effect: REGENERATION,1,0,base"));
+            yml.addDefault("upgrade-heal-pool.tier-1.receive", Collections.singletonList("player-effect: REGENERATION,0,0,base"));
 
-            yml.addDefault("upgrade-dragon.tier-1.currency", "diamond");
-            yml.addDefault("upgrade-dragon.tier-1.cost", 5);
-            addDefaultDisplayItem("upgrade-dragon.tier-1", "DRAGON_EGG", 0, 1, false);
-            yml.addDefault("upgrade-dragon.tier-1.receive", Collections.singletonList("dragon: 1"));
+            // Cushioned Boots replaces Dragon Buff (every team gets a 2nd dragon during sudden death instead)
+            yml.addDefault("upgrade-cushioned-boots.tier-1.currency", "diamond");
+            yml.addDefault("upgrade-cushioned-boots.tier-1.cost", 1);
+            yml.addDefault("upgrade-cushioned-boots.tier-1.cost-4s", 2);
+            addDefaultDisplayItem("upgrade-cushioned-boots.tier-1", "IRON_BOOTS", 0, 1, false);
+            yml.addDefault("upgrade-cushioned-boots.tier-1.receive", Collections.singletonList("enchant-item: PROTECTION_FALL,1,armor"));
+
+            yml.addDefault("upgrade-cushioned-boots.tier-2.currency", "diamond");
+            yml.addDefault("upgrade-cushioned-boots.tier-2.cost", 2);
+            yml.addDefault("upgrade-cushioned-boots.tier-2.cost-4s", 4);
+            addDefaultDisplayItem("upgrade-cushioned-boots.tier-2", "IRON_BOOTS", 0, 2, false);
+            yml.addDefault("upgrade-cushioned-boots.tier-2.receive", Collections.singletonList("enchant-item: PROTECTION_FALL,2,armor"));
 
             addDefaultDisplayItem("category-traps", "LEATHER", 0, 1, false);
             yml.addDefault("category-traps.category-content", Arrays.asList("base-trap-1,10", "base-trap-2,11",
@@ -132,17 +154,17 @@ public class UpgradesConfig extends ConfigManager {
                     "GRAY_STAINED_GLASS"), 8, 3, false);
 
             addDefaultDisplayItem("base-trap-1", "TRIPWIRE_HOOK", 0, 1, false);
-            yml.addDefault("base-trap-1.receive", Arrays.asList("player-effect: BLINDNESS,1,5,enemy", "player-effect: SLOW,1,5,enemy"));
+            yml.addDefault("base-trap-1.receive", Arrays.asList("player-effect: BLINDNESS,0,8,enemy", "player-effect: SLOW,0,8,enemy"));
 
             addDefaultDisplayItem("base-trap-2", "FEATHER", 0, 1, false);
-            yml.addDefault("base-trap-2.receive", Collections.singletonList("player-effect: SPEED,1,15,base"));
+            yml.addDefault("base-trap-2.receive", Arrays.asList("player-effect: SPEED,1,15,base", "player-effect: JUMP,1,15,base"));
 
             addDefaultDisplayItem("base-trap-3", getForCurrentVersion("REDSTONE_TORCH_ON", "REDSTONE_TORCH", "REDSTONE_TORCH"), 0, 1, false);
             yml.addDefault("base-trap-3.custom-announce", true);
             yml.addDefault("base-trap-3.receive", Collections.singletonList("remove-effect: INVISIBILITY,enemy"));
 
             addDefaultDisplayItem("base-trap-4", "IRON_PICKAXE", 0, 1, false);
-            yml.addDefault("base-trap-4.receive", Collections.singletonList("player-effect: SLOW_DIGGING,1,15,enemy"));
+            yml.addDefault("base-trap-4.receive", Collections.singletonList("player-effect: SLOW_DIGGING,0,10,enemy"));
 
             //noinspection ArraysAsListWithZeroOrOneArgument
             yml.addDefault("separator-back.on-click.player", Arrays.asList("bw upgradesmenu"));

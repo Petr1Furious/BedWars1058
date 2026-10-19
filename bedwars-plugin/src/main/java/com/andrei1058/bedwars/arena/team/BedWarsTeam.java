@@ -424,6 +424,8 @@ public class BedWarsTeam implements ITeam {
                 if (nms.isArmor(i)) {
                     ItemMeta im = i.getItemMeta();
                     for (TeamEnchant e : getArmorsEnchantments()) {
+                        // e.g. Feather Falling (Cushioned Boots) only goes on boots
+                        if (!e.getEnchantment().canEnchantItem(i)) continue;
                         im.addEnchant(e.getEnchantment(), e.getAmplifier(), true);
                     }
                     i.setItemMeta(im);
@@ -642,7 +644,7 @@ public class BedWarsTeam implements ITeam {
         for (Player p : getMembers()) {
             for (ItemStack i : p.getInventory().getArmorContents()) {
                 if (i == null) continue;
-                if (nms.isArmor(i)) {
+                if (nms.isArmor(i) && e.canEnchantItem(i)) {
                     ItemMeta im = i.getItemMeta();
                     im.addEnchant(e, a, true);
                     i.setItemMeta(im);

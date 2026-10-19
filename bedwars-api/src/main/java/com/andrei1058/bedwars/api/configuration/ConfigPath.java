@@ -126,6 +126,8 @@ public class ConfigPath {
     public static final String GENERAL_CONFIGURATION_BEDS_DESTROY_COUNTDOWN = "countdowns.next-event-beds-destroy";
     public static final String GENERAL_CONFIGURATION_DRAGON_SPAWN_COUNTDOWN = "countdowns.next-event-dragon-spawn";
     public static final String GENERAL_CONFIGURATION_GAME_END_COUNTDOWN = "countdowns.next-event-game-end";
+    // seconds into sudden death (the game-end countdown) when every team gets one more dragon, 0 disables
+    public static final String GENERAL_CONFIGURATION_EXTRA_DRAGON_DELAY = "countdowns.next-event-extra-dragon";
 
     public static final String GENERAL_CONFIGURATION_HUNGER_WAITING = "allow-hunger-depletion.waiting";
     public static final String GENERAL_CONFIGURATION_HUNGER_INGAME = "allow-hunger-depletion.ingame";
@@ -331,6 +333,8 @@ public class ConfigPath {
     public static final String SHOP_CATEGORY_CONTENT_IS_DOWNGRADABLE = "content-settings.is-downgradable";
     public static final String SHOP_CATEGORY_CONTENT_IS_UNBREAKABLE = "content-settings.is-unbreakable";
     public static final String SHOP_CATEGORY_CONTENT_WEIGHT = "content-settings.weight";
+    // only purchasable once every enemy bed is destroyed (tracker compass)
+    public static final String SHOP_CATEGORY_CONTENT_REQUIRES_ENEMY_BEDS_DESTROYED = "content-settings.requires-enemy-beds-destroyed";
     public static final String SHOP_CATEGORY_CONTENT_CONTENT_TIERS = "content-tiers";
     public static final String SHOP_CATEGORY_CONTENT_PATH = ".category-content";
 
