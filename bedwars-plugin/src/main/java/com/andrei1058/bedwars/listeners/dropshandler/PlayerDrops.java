@@ -18,6 +18,7 @@
  * Contact e-mail: andrew.dascalu@gmail.com
  */
 
+
 package com.andrei1058.bedwars.listeners.dropshandler;
 
 import com.andrei1058.bedwars.api.arena.IArena;
@@ -27,15 +28,16 @@ import com.andrei1058.bedwars.api.events.player.PlayerKillEvent;
 import com.andrei1058.bedwars.api.language.Messages;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.andrei1058.bedwars.BedWars.nms;
 import static com.andrei1058.bedwars.api.language.Language.getMsg;
 
 public class PlayerDrops {
@@ -45,6 +47,12 @@ public class PlayerDrops {
 
     /**
      * if bedWars should handle drops behavior.
+     * <p>
+     * Final kills (Hypixel style): the victim's resources go to the killer's inventory, the victim's
+     * ender chest drops at the killer's team forge, nothing else drops. Without a killer the resources
+     * are lost and the ender chest drops at the victim's own forge.
+     * <p>
+     * Normal kills: resources go to the killer, or drop on the floor without one.
      *
      * @return true if event drops must be cleared.
      */
@@ -52,114 +60,97 @@ public class PlayerDrops {
         if (arena.getConfig().getBoolean(ConfigPath.ARENA_NORMAL_DEATH_DROPS)) {
             return false;
         }
-        if (cause == PlayerKillEvent.PlayerKillCause.PLAYER_PUSH || cause == PlayerKillEvent.PlayerKillCause.PLAYER_PUSH_FINAL) {
-            // if died by fall damage drop items at location
-            dropItems(victim, inventory);
-            return true;
+        if (killer != null && killer.getUniqueId().equals(victim.getUniqueId())) {
+            killer = null;
         }
-        if (killer == null) {
-            // Death without a attacker drops items on the floor
-            dropItems(victim, inventory);
-            return true;
+        if (killer != null && killersTeam == null) {
+            killersTeam = arena.getTeam(killer);
         }
-        if (cause.isDespawnable()) {
-            // If killed by a ironGolem or silverFish drop on floor
-            dropItems(victim, inventory);
-            return true;
-        }
-        if (cause.isPvpLogOut()) {
-            // if is pvp log out drop at disconnect location
-            dropItems(victim, inventory);
-            return true;
-        }
-        if (cause.isFinalKill()) {
-            // if is final kill drop items at generator
-            if (victimsTeam != null) {
-                Location dropsLocation = new Location(victim.getWorld(), victimsTeam.getKillDropsLocation().getBlockX(), victimsTeam.getKillDropsLocation().getY(), victimsTeam.getKillDropsLocation().getZ());
-                victim.getEnderChest().forEach(item -> {
-                    if (item != null) {
-                        victim.getWorld().dropItemNaturally(dropsLocation, item);
-                    }
-                });
+
+        if (cause.isFinalKill() || (victimsTeam != null && victimsTeam.isBedDestroyed())) {
+            // ender chest -> killer's forge, or the victim's own forge without a killer
+            ITeam forgeTeam = killersTeam != null && !killersTeam.equals(victimsTeam) ? killersTeam : victimsTeam;
+            if (forgeTeam != null) {
+                Location dropsLocation = forgeLocation(arena.getWorld(), forgeTeam);
+                for (ItemStack item : victim.getEnderChest().getContents()) {
+                    if (item == null || item.getType() == Material.AIR) continue;
+                    arena.getWorld().dropItem(dropsLocation, item);
+                }
                 victim.getEnderChest().clear();
             }
+            // resources -> killer, lost otherwise
+            if (killer != null && canReceive(arena, killer) && !cause.isDespawnable()) {
+                giveResources(killer, inventory);
+            }
+            return true;
         }
 
-        // victim's inventory
-
-        if (victimsTeam != null && !(victimsTeam.equals(killersTeam) && victim.equals(killer))) {
-            // if final kill give items at kill drops location (team generator)
-            if (victimsTeam.isBedDestroyed()) {
-                for (ItemStack i : inventory) {
-                    if (i == null) continue;
-                    if (i.getType() == Material.AIR) continue;
-                    if (nms.isArmor(i) || nms.isBow(i) || nms.isSword(i) || nms.isTool(i)) continue;
-                    if (!nms.getShopUpgradeIdentifier(i).trim().isEmpty()) continue;
-                    if (arena.getTeam(killer) != null) {
-                        Vector v = victimsTeam.getKillDropsLocation();
-                        killer.getWorld().dropItemNaturally(new Location(arena.getWorld(), v.getX(), v.getY(), v.getZ()), i);
-                    }
-                }
-
-            } else {
-                // add-to-inventory feature if receiver is not respawning
-                if (!arena.isPlayer(killer)) return true;
-                if (arena.isReSpawning(killer)) return true;
-                Map<Material, Integer> materialDrops = new HashMap<>();
-                for (ItemStack i : inventory) {
-                    if (i == null) continue;
-                    if (i.getType() == Material.AIR) continue;
-                    if (i.getType() == Material.DIAMOND || i.getType() == Material.EMERALD || i.getType() == Material.IRON_INGOT || i.getType() == Material.GOLD_INGOT) {
-
-                        // add to killer inventory
-                        killer.getInventory().addItem(i);
-
-                        // count items
-                        if (materialDrops.containsKey(i.getType())) {
-                            materialDrops.replace(i.getType(), materialDrops.get(i.getType()) + i.getAmount());
-                        } else {
-                            materialDrops.put(i.getType(), i.getAmount());
-                        }
-                    }
-                }
-
-                for (Map.Entry<Material, Integer> entry : materialDrops.entrySet()) {
-                    String msg = "";
-                    int amount = entry.getValue();
-                    switch (entry.getKey()) {
-                        case DIAMOND:
-                            msg = getMsg(killer, Messages.PLAYER_DIE_REWARD_DIAMOND).replace("{meaning}", amount == 1 ?
-                                    getMsg(killer, Messages.MEANING_DIAMOND_SINGULAR) : getMsg(killer, Messages.MEANING_DIAMOND_PLURAL));
-                            break;
-                        case EMERALD:
-                            msg = getMsg(killer, Messages.PLAYER_DIE_REWARD_EMERALD).replace("{meaning}", amount == 1 ?
-                                    getMsg(killer, Messages.MEANING_EMERALD_SINGULAR) : getMsg(killer, Messages.MEANING_EMERALD_PLURAL));
-                            break;
-                        case IRON_INGOT:
-                            msg = getMsg(killer, Messages.PLAYER_DIE_REWARD_IRON).replace("{meaning}", amount == 1 ?
-                                    getMsg(killer, Messages.MEANING_IRON_SINGULAR) : getMsg(killer, Messages.MEANING_IRON_PLURAL));
-                            break;
-                        case GOLD_INGOT:
-                            msg = getMsg(killer, Messages.PLAYER_DIE_REWARD_GOLD).replace("{meaning}", amount == 1 ?
-                                    getMsg(killer, Messages.MEANING_GOLD_SINGULAR) : getMsg(killer, Messages.MEANING_GOLD_PLURAL));
-                            break;
-                    }
-                    killer.sendMessage(msg.replace("{amount}", String.valueOf(amount)));
-                }
-                materialDrops.clear();
-            }
-
+        // regular kill
+        if (killer == null || cause.isDespawnable() || cause.isPvpLogOut()
+                || cause == PlayerKillEvent.PlayerKillCause.PLAYER_PUSH) {
+            dropItems(victim, inventory);
+            return true;
+        }
+        if (canReceive(arena, killer)) {
+            giveResources(killer, inventory);
         }
         return true;
     }
 
+    private static boolean canReceive(IArena arena, Player killer) {
+        return arena.isPlayer(killer) && !arena.isReSpawning(killer) && !arena.isSpectator(killer);
+    }
+
+    public static Location forgeLocation(World world, ITeam team) {
+        Vector v = team.getKillDropsLocation();
+        return new Location(world, v.getBlockX() + 0.5, v.getY(), v.getBlockZ() + 0.5);
+    }
+
+    private static boolean isResource(@Nullable ItemStack i) {
+        if (i == null) return false;
+        Material m = i.getType();
+        return m == Material.DIAMOND || m == Material.EMERALD || m == Material.IRON_INGOT || m == Material.GOLD_INGOT;
+    }
+
+    private static void giveResources(Player killer, List<ItemStack> inventory) {
+        Map<Material, Integer> materialDrops = new EnumMap<>(Material.class);
+        for (ItemStack i : inventory) {
+            if (!isResource(i)) continue;
+            killer.getInventory().addItem(i.clone());
+            materialDrops.merge(i.getType(), i.getAmount(), Integer::sum);
+        }
+
+        for (Map.Entry<Material, Integer> entry : materialDrops.entrySet()) {
+            String msg = "";
+            int amount = entry.getValue();
+            switch (entry.getKey()) {
+                case DIAMOND:
+                    msg = getMsg(killer, Messages.PLAYER_DIE_REWARD_DIAMOND).replace("{meaning}", amount == 1 ?
+                            getMsg(killer, Messages.MEANING_DIAMOND_SINGULAR) : getMsg(killer, Messages.MEANING_DIAMOND_PLURAL));
+                    break;
+                case EMERALD:
+                    msg = getMsg(killer, Messages.PLAYER_DIE_REWARD_EMERALD).replace("{meaning}", amount == 1 ?
+                            getMsg(killer, Messages.MEANING_EMERALD_SINGULAR) : getMsg(killer, Messages.MEANING_EMERALD_PLURAL));
+                    break;
+                case IRON_INGOT:
+                    msg = getMsg(killer, Messages.PLAYER_DIE_REWARD_IRON).replace("{meaning}", amount == 1 ?
+                            getMsg(killer, Messages.MEANING_IRON_SINGULAR) : getMsg(killer, Messages.MEANING_IRON_PLURAL));
+                    break;
+                case GOLD_INGOT:
+                    msg = getMsg(killer, Messages.PLAYER_DIE_REWARD_GOLD).replace("{meaning}", amount == 1 ?
+                            getMsg(killer, Messages.MEANING_GOLD_SINGULAR) : getMsg(killer, Messages.MEANING_GOLD_PLURAL));
+                    break;
+                default:
+                    break;
+            }
+            killer.sendMessage(msg.replace("{amount}", String.valueOf(amount)));
+        }
+    }
+
     private static void dropItems(Player player, List<ItemStack> inventory) {
         for (ItemStack i : inventory) {
-            if (i == null) continue;
-            if (i.getType() == Material.AIR) continue;
-            if (i.getType() == Material.DIAMOND || i.getType() == Material.EMERALD || i.getType() == Material.IRON_INGOT || i.getType() == Material.GOLD_INGOT) {
-                player.getLocation().getWorld().dropItemNaturally(player.getLocation(), i);
-            }
+            if (!isResource(i)) continue;
+            player.getLocation().getWorld().dropItemNaturally(player.getLocation(), i);
         }
     }
 }

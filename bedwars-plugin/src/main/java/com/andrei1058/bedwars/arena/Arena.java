@@ -879,7 +879,11 @@ public class Arena implements IArena {
                                     .replace("{KillerTeamName}", killerTeam.getDisplayName(lang)));
                         }
                     }
-                    PlayerDrops.handlePlayerDrops(this, p, lastDamager, team, killerTeam, cause, new ArrayList<>(Arrays.asList(p.getInventory().getContents())));
+                    try {
+                        PlayerDrops.handlePlayerDrops(this, p, lastDamager, team, killerTeam, cause, new ArrayList<>(Arrays.asList(p.getInventory().getContents())));
+                    } catch (RuntimeException ex) {
+                        plugin.getLogger().log(java.util.logging.Level.SEVERE, "Could not hand out the drops of " + p.getName(), ex);
+                    }
                 }
             }
         }

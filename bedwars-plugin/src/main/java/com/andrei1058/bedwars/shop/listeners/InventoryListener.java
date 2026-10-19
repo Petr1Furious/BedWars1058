@@ -214,9 +214,8 @@ public class InventoryListener implements Listener {
             }
         }
 
-        String identifier = nms.getShopUpgradeIdentifier(i);
+        String identifier = com.andrei1058.bedwars.shop.ShopItemTags.upgradeId(i);
         if (identifier == null) return false;
-        if (identifier.equals("null")) return false;
         ShopCache.CachedItem cachedItem = sc.getCachedItem(identifier);
         return cachedItem != null;
         // the commented line bellow was blocking movement only if tiers amount > 1
