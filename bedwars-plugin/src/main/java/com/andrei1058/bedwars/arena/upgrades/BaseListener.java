@@ -155,14 +155,7 @@ public class BaseListener implements Listener {
         if (e == null) return;
         BedWarsTeam t = (BedWarsTeam) e.getTeam();
         if (t.isMember(e.getPlayer())) {
-            // Remove effects for members
-            for (PotionEffect pef : e.getPlayer().getActivePotionEffects()) {
-                for (PotionEffect pf : t.getBaseEffects()) {
-                    if (pef.getType() == pf.getType()) {
-                        e.getPlayer().removePotionEffect(pf.getType());
-                    }
-                }
-            }
+            removeBaseEffects(e.getPlayer(), t);
         }/* else {
             // Remove effects for enemies
             for (PotionEffect pef : e.getPlayer().getActivePotionEffects()) {
@@ -173,6 +166,41 @@ public class BaseListener implements Listener {
                 }
             }
         }*/
+    }
+
+    /**
+     * Remove only what the team's base upgrades (heal pool) gave the player. An effect of the same type from
+     * somewhere else (a golden apple's Regeneration, a potion) is kept. If such an effect is currently shown on top
+     * of the base one, the base one is hidden underneath it (vanilla keeps the weaker, longer effect) and would come
+     * back once it expires, so the effect is re-applied without the hidden base effect.
+     */
+    static void removeBaseEffects(Player player, ITeam team) {
+        for (PotionEffect base : team.getBaseEffects()) {
+            PotionEffect current = null;
+            for (PotionEffect active : player.getActivePotionEffects()) {
+                if (active.getType().equals(base.getType())) {
+                    current = active;
+                    break;
+                }
+            }
+            if (current == null) continue;
+            player.removePotionEffect(base.getType());
+            if (!isFromBase(current, base)) {
+                player.addPotionEffect(current);
+            }
+        }
+    }
+
+    /**
+     * Base effects are created with a (practically) infinite duration, so an active effect with the same
+     * amplifier and a remaining duration of more than a day is the base one.
+     */
+    static boolean isFromBase(PotionEffect current, PotionEffect base) {
+        if (current.getAmplifier() != base.getAmplifier()) return false;
+        final int day = 20 * 60 * 60 * 24;
+        boolean baseIsLong = base.getDuration() < 0 || base.getDuration() > day;
+        if (!baseIsLong) return current.getDuration() <= base.getDuration();
+        return current.getDuration() < 0 || current.getDuration() > day;
     }
 
     @EventHandler

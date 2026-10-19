@@ -2,7 +2,9 @@ package com.andrei1058.bedwars.arena.upgrades;
 
 import com.andrei1058.bedwars.api.arena.IArena;
 import com.andrei1058.bedwars.api.arena.team.ITeam;
+import com.andrei1058.bedwars.api.arena.GameState;
 import com.andrei1058.bedwars.api.events.gameplay.GameEndEvent;
+import com.andrei1058.bedwars.api.events.gameplay.GameStateChangeEvent;
 import com.andrei1058.bedwars.api.events.player.PlayerLeaveArenaEvent;
 import com.andrei1058.bedwars.api.events.server.ArenaDisableEvent;
 import com.andrei1058.bedwars.api.events.team.TeamEliminatedEvent;
@@ -32,6 +34,14 @@ public class HealPoolListner implements Listener {
     @EventHandler
     public void onEnd(GameEndEvent e) {
         HealPoolTask.removeForArena(e.getArena());
+    }
+
+    @EventHandler
+    public void onStateChange(GameStateChangeEvent e) {
+        // restarting / waiting: never let a heal pool outlive its game
+        if (e.getNewState() != GameState.playing) {
+            HealPoolTask.removeForArena(e.getArena());
+        }
     }
 
     @EventHandler
