@@ -164,36 +164,10 @@ public class OreGenerator implements IGenerator {
                 }
                 lastSpawn = delay;
             }
-            if (bwt == null) {
-                dropItem(location);
-                return;
-            }
-            if (bwt.getMembers().size() == 1) {
-                dropItem(location);
-                return;
-            }
-            if (plugin.getConfig().getBoolean(ConfigPath.GENERAL_CONFIGURATION_ENABLE_GEN_SPLIT)) {
-                Object[] players = location.getWorld().getNearbyEntities(location, 1, 1, 1).stream().filter(entity -> entity.getType() == EntityType.PLAYER)
-                        .filter(entity -> arena.isPlayer((Player) entity)).toArray();
-                if (players.length <= 1) {
-                    dropItem(location);
-                    return;
-                }
-                for (Object o : players) {
-                    Player player = (Player) o;
-                    ItemStack item = ore.clone();
-                    item.setAmount(amount);
-                    player.playSound(player.getLocation(), Sound.valueOf(BedWars.getForCurrentVersion("ITEM_PICKUP", "ENTITY_ITEM_PICKUP", "ENTITY_ITEM_PICKUP")), 0.6f, 1.3f);
-                    Collection<ItemStack> excess = player.getInventory().addItem(item).values();
-                    for (ItemStack value : excess) {
-                        dropItem(player.getLocation(), value.getAmount());
-                    }
-                }
-                return;
-            } else {
-                dropItem(location);
-                return;
-            }
+            // Hypixel split: no longer split at spawn time; teammates near the forge get a copy when
+            // someone picks the drop up (see ItemDropPickListener)
+            dropItem(location);
+            return;
         }
         lastSpawn--;
         for (IGenHolo e : armorStands.values()) {
@@ -202,15 +176,13 @@ public class OreGenerator implements IGenerator {
     }
 
     private void dropItem(Location location, int amount) {
+        // tag the item entity: team name (empty for diamond/emerald gens) and whether drops may stack
+        String tag = (bwt == null ? "" : bwt.getName()) + "|" + (stack ? "s" : "n");
         for (int temp = amount; temp > 0; temp--) {
             ItemStack itemStack = new ItemStack(ore);
-            if (!stack) {
-                ItemMeta itemMeta = itemStack.getItemMeta();
-                itemMeta.setDisplayName("custom" + dropID++);
-                itemStack.setItemMeta(itemMeta);
-            }
             Item item = location.getWorld().dropItem(location, itemStack);
             item.setVelocity(new Vector(0, 0, 0));
+            BedWars.nms.setGeneratorItemTag(item, tag);
         }
     }
 

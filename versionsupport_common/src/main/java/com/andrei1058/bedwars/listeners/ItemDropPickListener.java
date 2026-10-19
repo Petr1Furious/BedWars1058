@@ -22,6 +22,9 @@ package com.andrei1058.bedwars.listeners;
 
 import com.andrei1058.bedwars.api.arena.GameState;
 import com.andrei1058.bedwars.api.arena.IArena;
+import com.andrei1058.bedwars.api.arena.generator.IGenerator;
+import com.andrei1058.bedwars.api.arena.team.ITeam;
+import com.andrei1058.bedwars.api.configuration.ConfigPath;
 import com.andrei1058.bedwars.api.events.player.PlayerGeneratorCollectEvent;
 import com.andrei1058.bedwars.api.server.ServerType;
 import org.bukkit.Bukkit;
@@ -38,7 +41,7 @@ import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerPickupArrowEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.Location;
 
 import static com.andrei1058.bedwars.support.version.common.VersionCommon.api;
 
@@ -57,7 +60,7 @@ public class ItemDropPickListener {
         @SuppressWarnings("deprecation")
         @EventHandler
         public void onDrop(PlayerPickupItemEvent e){
-            if (managePickup(e.getItem(), e.getPlayer())) e.setCancelled(true);
+            if (managePickup(e.getItem(), e.getPlayer(), e.getRemaining())) e.setCancelled(true);
         }
     }
 
@@ -73,7 +76,7 @@ public class ItemDropPickListener {
     public static class EntityPickup implements Listener {
         @EventHandler
         public void onPickup(EntityPickupItemEvent e){
-            if (managePickup(e.getItem(), e.getEntity())) e.setCancelled(true);
+            if (managePickup(e.getItem(), e.getEntity(), e.getRemaining())) e.setCancelled(true);
         }
     }
 
@@ -90,7 +93,7 @@ public class ItemDropPickListener {
     /**
      * @return true if event should be cancelled
      */
-    private static boolean managePickup(Item item, LivingEntity player) {
+    private static boolean managePickup(Item item, LivingEntity player, int remaining) {
         if (!(player instanceof Player)) return false;
         if (api.getServerType() == ServerType.MULTIARENA) {
             //noinspection ConstantConditions
@@ -117,27 +120,71 @@ public class ItemDropPickListener {
         if (item.getItemStack().getType().toString().equals("BED")) {
             item.remove();
             return true;
-        } else if (item.getItemStack().hasItemMeta()) {
-            //noinspection ConstantConditions
-            if (item.getItemStack().getItemMeta().hasDisplayName()) {
-                if (item.getItemStack().getItemMeta().getDisplayName().contains("custom")) {
-                    Material material = item.getItemStack().getType();
-                    ItemMeta itemMeta = new ItemStack(material).getItemMeta();
+        }
 
-                    //Call ore pick up event
-                    if (!api.getAFKUtil().isPlayerAFK(((Player) player).getPlayer())){
-                        PlayerGeneratorCollectEvent event = new PlayerGeneratorCollectEvent((Player) player, item, a);
-                        Bukkit.getPluginManager().callEvent(event);
-                        if (event.isCancelled()) {
-                            return true;
-                        } else {
-                            item.getItemStack().setItemMeta(itemMeta);
-                        }
-                    }else return true; //Cancel event if player is afk
-                }
+        String genTag = api.getVersionSupport().getGeneratorItemTag(item);
+        if (genTag != null) {
+            //Cancel event if player is afk
+            if (api.getAFKUtil().isPlayerAFK((Player) player)) return true;
+            //Call ore pick up event
+            PlayerGeneratorCollectEvent event = new PlayerGeneratorCollectEvent((Player) player, item, a);
+            Bukkit.getPluginManager().callEvent(event);
+            if (event.isCancelled()) return true;
+            int picked = item.getItemStack().getAmount() - Math.max(0, remaining);
+            if (picked > 0) {
+                splitWithTeammates(a, (Player) player, item, genTag, picked);
             }
         }
         return false;
+    }
+
+    /**
+     * Hypixel generator split: teammates of the picker standing near the team forge the item came from
+     * get the same amount of iron / gold.
+     */
+    private static void splitWithTeammates(IArena a, Player picker, Item item, String genTag, int amount) {
+        Material type = item.getItemStack().getType();
+        if (type != Material.IRON_INGOT && type != Material.GOLD_INGOT) return;
+        int sep = genTag.lastIndexOf('|');
+        String teamName = sep < 0 ? genTag : genTag.substring(0, sep);
+        if (teamName.isEmpty()) return; // diamond / emerald generator
+        if (!api.getConfigs().getMainConfig().getBoolean(ConfigPath.GENERAL_CONFIGURATION_ENABLE_GEN_SPLIT)) return;
+        ITeam pickerTeam = a.getTeam(picker);
+        if (pickerTeam == null || pickerTeam.getMembers().size() <= 1) return;
+        ITeam genTeam = a.getTeam(teamName);
+        if (genTeam == null) return;
+
+        // the generator this item came from: the nearest one of that team
+        Location itemLoc = item.getLocation();
+        Location genLoc = null;
+        double best = Double.MAX_VALUE;
+        for (IGenerator g : genTeam.getGenerators()) {
+            Location l = g.getLocation();
+            if (l == null || l.getWorld() == null || !l.getWorld().equals(itemLoc.getWorld())) continue;
+            double d = l.distanceSquared(itemLoc);
+            if (d < best) {
+                best = d;
+                genLoc = l;
+            }
+        }
+        if (genLoc == null) return;
+
+        double radius = api.getConfigs().getMainConfig().getYml().getDouble(ConfigPath.GENERAL_CONFIGURATION_GEN_SPLIT_RADIUS, 2.0);
+        double radiusSq = radius * radius;
+        for (Player mate : pickerTeam.getMembers()) {
+            if (mate.equals(picker)) continue;
+            if (!a.isPlayer(mate) || a.isSpectator(mate) || a.isReSpawning(mate)) continue;
+            if (!mate.getWorld().equals(genLoc.getWorld())) continue;
+            if (mate.getLocation().distanceSquared(genLoc) > radiusSq) continue;
+            ItemStack copy = new ItemStack(type, amount);
+            for (ItemStack excess : mate.getInventory().addItem(copy).values()) {
+                mate.getWorld().dropItem(mate.getLocation(), excess);
+            }
+            try {
+                mate.playSound(mate.getLocation(), "minecraft:entity.item.pickup", 0.2f, 1.8f);
+            } catch (RuntimeException ignored) {
+            }
+        }
     }
 
     /**

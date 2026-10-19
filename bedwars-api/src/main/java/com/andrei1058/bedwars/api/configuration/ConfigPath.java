@@ -175,6 +175,8 @@ public class ConfigPath {
     public static final String GENERAL_CONFIGURATION_DISABLE_ANVIL = "inventories.disable-anvil";
     public static final String GENERAL_CONFIGURATION_MARK_LEAVE_AS_ABANDON = "mark-leave-as-abandon";
     public static final String GENERAL_CONFIGURATION_ENABLE_GEN_SPLIT = "enable-gen-split";
+    /** Teammates within this distance of a team generator get a copy of iron/gold picked up from it. */
+    public static final String GENERAL_CONFIGURATION_GEN_SPLIT_RADIUS = "gen-split-radius";
 
     public static final String GENERAL_CONFIG_PLACEHOLDERS_REPLACEMENTS_SERVER_IP = "server-ip";
     public static final String GENERAL_CONFIG_PLACEHOLDERS_REPLACEMENTS_POWERED_BY = "powered-by";
