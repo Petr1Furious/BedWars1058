@@ -31,6 +31,13 @@ public final class TrackerCompass {
         return isTracker(nms.getItemInHand(player));
     }
 
+    /**
+     * @return true if the player holds a tracker that is active (every enemy bed destroyed, an enemy to track).
+     */
+    public static boolean isTracking(IArena arena, Player player, ITeam own) {
+        return isHoldingTracker(player) && allEnemyBedsDestroyed(arena, own) && nearestEnemy(arena, player, own) != null;
+    }
+
     private static boolean carriesTracker(Player player) {
         for (ItemStack i : player.getInventory().getContents()) {
             if (isTracker(i)) return true;

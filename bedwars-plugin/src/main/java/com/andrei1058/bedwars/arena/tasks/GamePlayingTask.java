@@ -179,7 +179,7 @@ public class GamePlayingTask implements Runnable, PlayingTask {
             if (t.getSize() > 1) {
                 for (Player p : t.getMembers()) {
                     // holding a tracker compass: the action bar shows the tracked enemy instead
-                    if (TrackerCompass.isHoldingTracker(p)) continue;
+                    if (TrackerCompass.isTracking(getArena(), p, t)) continue;
                     for (Player p2 : t.getMembers()) {
                         if (p2 == p) continue;
                         if (distance == 0) {
