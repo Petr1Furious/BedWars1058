@@ -300,7 +300,7 @@ public class Arena implements IArena {
                 .forEach(Entity::remove);
         for (String s : getConfig().getList(ConfigPath.ARENA_GAME_RULES)) {
             String[] rule = s.split(":");
-            if (rule.length == 2) world.setGameRuleValue(rule[0], rule[1]);
+            if (rule.length == 2) nms.setGameRule(world, rule[0], rule[1]);
         }
         world.setAutoSave(false);
 

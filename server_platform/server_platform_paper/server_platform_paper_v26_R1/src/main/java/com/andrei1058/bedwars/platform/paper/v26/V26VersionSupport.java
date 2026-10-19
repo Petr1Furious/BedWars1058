@@ -88,6 +88,29 @@ public class V26VersionSupport extends VersionSupport {
         new VersionCommon(this);
         armorHider.register();
         Bukkit.getPluginManager().registerEvents(new PearlMomentumListener(), getPlugin());
+        Bukkit.getPluginManager().registerEvents(new GeneratorItems(), getPlugin());
+    }
+
+    @Override
+    public boolean setGameRule(@NotNull World world, @NotNull String rule, @NotNull String value) {
+        return GameRules26.apply(world, rule, value, getPlugin().getLogger());
+    }
+
+    @Override
+    public void setGeneratorItemTag(@NotNull Item item, @NotNull String value) {
+        GeneratorItems.set(item, value);
+    }
+
+    @Override
+    public @Nullable String getGeneratorItemTag(@NotNull Item item) {
+        return GeneratorItems.get(item);
+    }
+
+    private static final Particle.DustOptions FOOTPRINT = new Particle.DustOptions(Color.fromRGB(0x2B, 0x2B, 0x2B), 0.7f);
+
+    @Override
+    public void showFootprint(@NotNull Player viewer, @NotNull Location location) {
+        viewer.spawnParticle(Particle.DUST, location, 1, 0, 0, 0, 0, FOOTPRINT);
     }
 
     @Override

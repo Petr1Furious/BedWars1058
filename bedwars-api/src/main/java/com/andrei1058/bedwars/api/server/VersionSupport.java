@@ -477,4 +477,37 @@ public abstract class VersionSupport {
     public boolean hasInvisibility(@NotNull PotionEffect pe) {
         return pe.getType().toString().contains("INVISIBILITY");
     }
+
+    /**
+     * Set an arena game rule given by its config name. Older configs use the pre-1.21.9 camelCase
+     * names (doDaylightCycle, doImmediateRespawn, ...); newer servers only know the registry keys
+     * (advance_time, immediate_respawn, ...), so implementations translate.
+     *
+     * @return true if the rule was applied.
+     */
+    @SuppressWarnings("deprecation")
+    public boolean setGameRule(@NotNull World world, @NotNull String rule, @NotNull String value) {
+        return world.setGameRuleValue(rule, value);
+    }
+
+    /**
+     * Mark a dropped item as spawned by a generator.
+     *
+     * @param value generator descriptor, see the plugin's OreGenerator.
+     */
+    public void setGeneratorItemTag(@NotNull org.bukkit.entity.Item item, @NotNull String value) {
+    }
+
+    /**
+     * @return the generator descriptor set by {@link #setGeneratorItemTag}, or null for any other item.
+     */
+    public @Nullable String getGeneratorItemTag(@NotNull org.bukkit.entity.Item item) {
+        return null;
+    }
+
+    /**
+     * Show a footprint particle of an invisible player to one viewer.
+     */
+    public void showFootprint(@NotNull Player viewer, @NotNull Location location) {
+    }
 }

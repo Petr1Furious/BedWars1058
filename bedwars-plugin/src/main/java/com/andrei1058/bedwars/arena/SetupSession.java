@@ -240,7 +240,7 @@ public class SetupSession implements ISetupSession {
                 .filter(e -> e.getType() != EntityType.PLAYER).filter(e -> e.getType() != EntityType.PAINTING)
                 .filter(e -> e.getType() != EntityType.ITEM_FRAME).forEach(Entity::remove), 30L);
         w.setAutoSave(false);
-        w.setGameRuleValue("doMobSpawning", "false");
+        BedWars.nms.setGameRule(w, "doMobSpawning", "false");
         Bukkit.getPluginManager().callEvent(new SetupSessionStartEvent(this));
         setStarted(true);
 
