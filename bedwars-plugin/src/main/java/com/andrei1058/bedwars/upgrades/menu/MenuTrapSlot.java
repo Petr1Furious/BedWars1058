@@ -77,22 +77,8 @@ public class MenuTrapSlot implements MenuContent {
                 .replace("{color}", Language.getMsg(player, ebe == null ? Messages.FORMAT_UPGRADE_COLOR_CANT_AFFORD : Messages.FORMAT_UPGRADE_COLOR_UNLOCKED)));
         List<String> lore = new ArrayList<>();
         if (ebe == null) {
-            int cost = UpgradesManager.getConfiguration().getInt(team.getArena().getArenaName().toLowerCase() + "-upgrades-settings.trap-start-price");
-            if (cost == 0) {
-                cost = UpgradesManager.getConfiguration().getInt("default-upgrades-settings.trap-start-price");
-            }
-            String curr = UpgradesManager.getConfiguration().getString(team.getArena().getArenaName().toLowerCase() + "-upgrades-settings.trap-currency");
-            if (curr == null) {
-                curr = UpgradesManager.getConfiguration().getString("default-upgrades-settings.trap-currency");
-            }
-            String currency = UpgradesManager.getCurrencyMsg(player, cost, curr);
-            if (!team.getActiveTraps().isEmpty()) {
-                int multiplier = UpgradesManager.getConfiguration().getInt(team.getArena().getArenaName().toLowerCase() + "-upgrades-settings.trap-increment-price");
-                if (multiplier == 0) {
-                    multiplier = UpgradesManager.getConfiguration().getInt("default-upgrades-settings.trap-increment-price");
-                }
-                cost = cost + (team.getActiveTraps().size() * multiplier);
-            }
+            int cost = UpgradesManager.getTrapCost(team);
+            String currency = UpgradesManager.getCurrencyMsg(player, cost, UpgradesManager.getTrapCurrency(team));
             for (String s : Language.getList(player, Messages.UPGRADES_TRAP_SLOT_ITEM_LORE1_PATH + name.replace("trap-slot-", ""))) {
                 lore.add(s.replace("{cost}", String.valueOf(cost)).replace("{currency}", currency));
             }
