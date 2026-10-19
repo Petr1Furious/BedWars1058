@@ -28,7 +28,7 @@ BedWars1058 will hook into it and do everything for you, no additional configura
 
 # Pre-made setups and community add-ons
 
-You can find a list of pre-made server setups and a lot of community add-ons [on BedWars1058 Wiki](https://wiki.andrei1058.dev/docs/BedWars1058/addons).
+You can find a list of pre-made server setups and a lot of community add-ons [on BedWars1058 Wiki](https://wiki.andrei1058.com/docs/BedWars1058/addons).
 
 # Main features
 
@@ -139,8 +139,3 @@ If you are not a programmer you can help answering people in the [Issues](https:
 
 # Contact
 [![Discord Server](https://discordapp.com/api/guilds/201345265821679617/widget.png?style=banner3)](https://discord.gg/XdJfN2X)
-
-# Special Thanks To
-[<img src="https://user-images.githubusercontent.com/21148213/121807008-8ffc6700-cc52-11eb-96a7-2f6f260f8fda.png" alt="" width="150">](https://www.jetbrains.com)
-
-Jetbrains supports BedWars1058 with their [Open Source Licenses](https://www.jetbrains.com/opensource/).
