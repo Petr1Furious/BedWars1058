@@ -44,37 +44,36 @@ public class TeamAssigner implements ITeamAssigner {
             LinkedList<List<Player>> teams = new LinkedList<>();
 
             List<Player> members;
+            // one list per party: every member returns the same party, so skip players already grouped
+            List<Player> grouped = new ArrayList<>();
             for (Player player : arena.getPlayers()) {
+                if (grouped.contains(player)) continue;
                 members = BedWars.getParty().getMembers(player);
                 if (members == null) continue;
                 members = new ArrayList<>(members);
+                members.removeIf(member -> !arena.isPlayer(member) || grouped.contains(member));
                 if (members.isEmpty()) continue;
-                members.removeIf(member -> !arena.isPlayer(member));
-                if (members.isEmpty()) continue;
+                grouped.addAll(members);
                 teams.add(members);
             }
             // prioritize bigger teams
+            teams.sort(Comparator.comparingInt((List<Player> l) -> l.size()).reversed());
 
-            if (!teams.isEmpty()) {
-                for (ITeam team : arena.getTeams()) {
-                    // sort
-                    teams.sort(Comparator.comparingInt(List::size));
-                    if (teams.get(0).isEmpty()) break;
-                    for (int i = 0; i < arena.getMaxInTeam() && team.getMembers().size() < arena.getMaxInTeam(); i++) {
-                        if (teams.get(0).size() > i) {
-                            Player toAdd = teams.get(0).remove(0);
-                            TeamAssignEvent e = new TeamAssignEvent(toAdd, team, arena);
-                            Bukkit.getPluginManager().callEvent(e);
-                            if (!e.isCancelled()) {
-                                toAdd.closeInventory();
-                                team.addPlayers(toAdd);
-                                skip.add(toAdd);
-                            }
-                        } else {
-                            break;
-                        }
+            for (ITeam team : arena.getTeams()) {
+                if (teams.isEmpty()) break;
+                List<Player> party = teams.get(0);
+                // fill this team with the whole party (the old index loop skipped every other member)
+                while (!party.isEmpty() && team.getMembers().size() < arena.getMaxInTeam()) {
+                    Player toAdd = party.remove(0);
+                    TeamAssignEvent e = new TeamAssignEvent(toAdd, team, arena);
+                    Bukkit.getPluginManager().callEvent(e);
+                    if (!e.isCancelled()) {
+                        toAdd.closeInventory();
+                        team.addPlayers(toAdd);
+                        skip.add(toAdd);
                     }
                 }
+                if (party.isEmpty()) teams.remove(0);
             }
         }
 

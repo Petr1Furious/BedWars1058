@@ -122,17 +122,9 @@ public class CategoryContent implements ICategoryContent {
         }
 
         itemNamePath = Messages.SHOP_CONTENT_TIER_ITEM_NAME.replace("%category%", categoryName).replace("%content%", contentName);
-        for (Language lang : Language.getLanguages()) {
-            if (!lang.exists(itemNamePath)) {
-                lang.set(itemNamePath, "&cName not set");
-            }
-        }
+        Language.saveIfNotExists(itemNamePath, "&cName not set");
         itemLorePath = Messages.SHOP_CONTENT_TIER_ITEM_LORE.replace("%category%", categoryName).replace("%content%", contentName);
-        for (Language lang : Language.getLanguages()) {
-            if (!lang.exists(itemLorePath)) {
-                lang.set(itemLorePath, "&cLore not set");
-            }
-        }
+        Language.saveIfNotExists(itemLorePath, "&cLore not set");
 
         identifier = path;
 
