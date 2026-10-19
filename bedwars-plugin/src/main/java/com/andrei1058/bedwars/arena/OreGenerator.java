@@ -35,14 +35,11 @@ import com.andrei1058.bedwars.api.region.Cuboid;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.Sound;
 import org.bukkit.entity.*;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.util.EulerAngle;
 import org.bukkit.util.Vector;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
@@ -56,7 +53,7 @@ public class OreGenerator implements IGenerator {
     private IArena arena;
     private ItemStack ore;
     private GeneratorType type;
-    private int rotate = 0, dropID = 0;
+    private int rotate = 0;
     private ITeam bwt;
     boolean up = true;
 

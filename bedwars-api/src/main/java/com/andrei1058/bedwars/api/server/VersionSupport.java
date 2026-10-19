@@ -507,7 +507,9 @@ public abstract class VersionSupport {
 
     /**
      * Show a footprint particle of an invisible player to one viewer.
+     *
+     * @param particle particle name; DUST (or null) gives the default small dark-grey dust.
      */
-    public void showFootprint(@NotNull Player viewer, @NotNull Location location) {
+    public void showFootprint(@NotNull Player viewer, @NotNull Location location, @Nullable String particle) {
     }
 }

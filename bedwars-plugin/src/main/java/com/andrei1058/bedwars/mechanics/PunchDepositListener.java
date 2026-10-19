@@ -28,7 +28,7 @@ import static com.andrei1058.bedwars.BedWars.nms;
 
 /**
  * Hypixel punch-to-deposit: left-clicking your team chest (or your ender chest) moves every item of the
- * held type from your inventory into it.
+ * held type from your inventory into it, with a chat message and a sound.
  */
 public class PunchDepositListener implements Listener {
 
@@ -68,7 +68,7 @@ public class PunchDepositListener implements Listener {
         ItemStack type = held.clone();
         int moved = deposit(p.getInventory(), target, type);
         if (moved == 0) {
-            nms.playAction(p, Language.getMsg(p, MechanicsMessages.DEPOSIT_FULL));
+            p.sendMessage(Language.getMsg(p, MechanicsMessages.DEPOSIT_FULL));
             return;
         }
         p.updateInventory();
@@ -76,7 +76,7 @@ public class PunchDepositListener implements Listener {
             p.playSound(b.getLocation(), "minecraft:entity.item.pickup", 0.8f, 1.2f);
         } catch (RuntimeException ignored) {
         }
-        nms.playAction(p, Language.getMsg(p, ender ? MechanicsMessages.DEPOSIT_ENDER_CHEST : MechanicsMessages.DEPOSIT_TEAM_CHEST)
+        p.sendMessage(Language.getMsg(p, ender ? MechanicsMessages.DEPOSIT_ENDER_CHEST : MechanicsMessages.DEPOSIT_TEAM_CHEST)
                 .replace("{amount}", String.valueOf(moved))
                 .replace("{item}", displayName(type)));
     }

@@ -27,11 +27,13 @@ public class FootprintTask implements Runnable {
     private static final double SIDE_OFFSET = 0.18;
 
     private final boolean showToSpectators;
+    private final String particle;
     private final Map<UUID, Location> lastLocation = new HashMap<>();
     private final Set<UUID> leftFoot = new HashSet<>();
 
-    public FootprintTask(boolean showToSpectators) {
+    public FootprintTask(boolean showToSpectators, String particle) {
         this.showToSpectators = showToSpectators;
+        this.particle = particle;
     }
 
     @Override
@@ -88,9 +90,9 @@ public class FootprintTask implements Runnable {
         }
     }
 
-    private static void send(Player viewer, Location print) {
+    private void send(Player viewer, Location print) {
         if (viewer.getWorld() != print.getWorld()) return;
         if (viewer.getLocation().distanceSquared(print) > VIEW_DISTANCE_SQ) return;
-        nms.showFootprint(viewer, print);
+        nms.showFootprint(viewer, print, particle);
     }
 }

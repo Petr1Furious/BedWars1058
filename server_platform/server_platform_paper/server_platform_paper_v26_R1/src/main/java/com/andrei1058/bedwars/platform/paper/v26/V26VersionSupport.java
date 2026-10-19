@@ -108,9 +108,27 @@ public class V26VersionSupport extends VersionSupport {
 
     private static final Particle.DustOptions FOOTPRINT = new Particle.DustOptions(Color.fromRGB(0x2B, 0x2B, 0x2B), 0.7f);
 
+    private String footprintName;
+    private Particle footprintParticle = Particle.DUST;
+
     @Override
-    public void showFootprint(@NotNull Player viewer, @NotNull Location location) {
-        viewer.spawnParticle(Particle.DUST, location, 1, 0, 0, 0, 0, FOOTPRINT);
+    public void showFootprint(@NotNull Player viewer, @NotNull Location location, @Nullable String particle) {
+        if (particle != null && !particle.equals(footprintName)) {
+            footprintName = particle;
+            Particle p;
+            try {
+                p = Particle.valueOf(particle.toUpperCase(java.util.Locale.ROOT));
+            } catch (IllegalArgumentException ex) {
+                p = Particle.DUST;
+            }
+            // only DUST carries data; anything else needing data falls back to it
+            footprintParticle = p == Particle.DUST || p.getDataType() == Void.class ? p : Particle.DUST;
+        }
+        if (footprintParticle == Particle.DUST) {
+            viewer.spawnParticle(Particle.DUST, location, 1, 0, 0, 0, 0, FOOTPRINT);
+        } else {
+            viewer.spawnParticle(footprintParticle, location, 1, 0, 0, 0, 0);
+        }
     }
 
     @Override

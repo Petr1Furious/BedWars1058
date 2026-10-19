@@ -15,6 +15,7 @@ public final class HypixelMechanics {
     public static final String FOOTPRINTS_ENABLED = "footprints.enabled";
     public static final String FOOTPRINTS_INTERVAL = "footprints.interval-ticks";
     public static final String FOOTPRINTS_SPECTATORS = "footprints.show-to-spectators";
+    public static final String FOOTPRINTS_PARTICLE = "footprints.particle";
     public static final String PUNCH_DEPOSIT_ENABLED = "punch-to-deposit";
 
     private HypixelMechanics() {
@@ -28,6 +29,7 @@ public final class HypixelMechanics {
         yml.addDefault(FOOTPRINTS_ENABLED, true);
         yml.addDefault(FOOTPRINTS_INTERVAL, 4);
         yml.addDefault(FOOTPRINTS_SPECTATORS, true);
+        yml.addDefault(FOOTPRINTS_PARTICLE, "DUST");
         yml.addDefault(PUNCH_DEPOSIT_ENABLED, true);
         yml.options().copyDefaults(true);
         BedWars.config.save();
@@ -37,7 +39,7 @@ public final class HypixelMechanics {
         }
         if (yml.getBoolean(FOOTPRINTS_ENABLED)) {
             long interval = Math.max(1, yml.getInt(FOOTPRINTS_INTERVAL));
-            Bukkit.getScheduler().runTaskTimer(plugin, new FootprintTask(yml.getBoolean(FOOTPRINTS_SPECTATORS)), interval, interval);
+            Bukkit.getScheduler().runTaskTimer(plugin, new FootprintTask(yml.getBoolean(FOOTPRINTS_SPECTATORS), yml.getString(FOOTPRINTS_PARTICLE, "DUST")), interval, interval);
         }
     }
 }
