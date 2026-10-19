@@ -169,30 +169,8 @@ public class MenuBaseTrap implements MenuContent, EnemyBaseEnterTrap, TeamUpgrad
 
     @Override
     public ItemStack getDisplayItem(Player player, ITeam team) {
-        Material currency = this.currency;
-        if (this.currency == null) {
-            String st = UpgradesManager.getConfiguration().getYml().getString(team.getArena().getGroup().toLowerCase() + "-upgrades-settings.trap-currency");
-            if (st == null) {
-                st = UpgradesManager.getConfiguration().getYml().getString("default-upgrades-settings.trap-currency");
-            }
-            currency = Material.valueOf(st.toUpperCase());
-        }
-
-        int cost = this.cost;
-        if (cost == 0) {
-            int multiplier = team.getActiveTraps().size();
-
-            int incrementer = UpgradesManager.getConfiguration().getYml().getInt(team.getArena().getGroup().toLowerCase() + "-upgrades-settings.trap-increment-price");
-            if (incrementer == 0) {
-                incrementer = UpgradesManager.getConfiguration().getYml().getInt("default-upgrades-settings.trap-increment-price");
-            }
-
-            cost = UpgradesManager.getConfiguration().getYml().getInt(team.getArena().getGroup().toLowerCase() + "-upgrades-settings.trap-start-price");
-            if (cost == 0) {
-                cost = UpgradesManager.getConfiguration().getYml().getInt("default-upgrades-settings.trap-start-price");
-            }
-            cost = cost + (multiplier * incrementer);
-        }
+        Material currency = this.currency == null ? UpgradesManager.getTrapCurrency(team) : this.currency;
+        int cost = this.cost == 0 ? UpgradesManager.getTrapCost(team) : this.cost;
 
         ItemStack i = displayItem.clone();
         ItemMeta im = i.getItemMeta();
@@ -240,30 +218,8 @@ public class MenuBaseTrap implements MenuContent, EnemyBaseEnterTrap, TeamUpgrad
             return;
         }
 
-        Material currency = this.currency;
-        if (this.currency == null) {
-            String st = UpgradesManager.getConfiguration().getYml().getString(team.getArena().getGroup().toLowerCase() + "-upgrades-settings.trap-currency");
-            if (st == null) {
-                st = UpgradesManager.getConfiguration().getYml().getString("default-upgrades-settings.trap-currency");
-            }
-            currency = Material.valueOf(st.toUpperCase());
-        }
-
-        int cost = this.cost;
-        if (cost == 0) {
-            int multiplier = team.getActiveTraps().size();
-
-            int incrementer = UpgradesManager.getConfiguration().getYml().getInt(team.getArena().getGroup().toLowerCase() + "-upgrades-settings.trap-increment-price");
-            if (incrementer == 0) {
-                incrementer = UpgradesManager.getConfiguration().getYml().getInt("default-upgrades-settings.trap-increment-price");
-            }
-
-            cost = UpgradesManager.getConfiguration().getYml().getInt(team.getArena().getGroup().toLowerCase() + "-upgrades-settings.trap-start-price");
-            if (cost == 0) {
-                cost = UpgradesManager.getConfiguration().getYml().getInt("default-upgrades-settings.trap-start-price");
-            }
-            cost = cost + (multiplier * incrementer);
-        }
+        Material currency = this.currency == null ? UpgradesManager.getTrapCurrency(team) : this.currency;
+        int cost = this.cost == 0 ? UpgradesManager.getTrapCost(team) : this.cost;
 
         int money = UpgradesManager.getMoney(player, currency);
         if (money < cost) {

@@ -21,6 +21,7 @@
 package com.andrei1058.bedwars.upgrades.menu;
 
 import com.andrei1058.bedwars.BedWars;
+import com.andrei1058.bedwars.api.arena.IArena;
 import com.andrei1058.bedwars.api.language.Language;
 import com.andrei1058.bedwars.api.language.Messages;
 import com.andrei1058.bedwars.api.upgrades.UpgradeAction;
@@ -41,6 +42,8 @@ public class UpgradeTier {
     private String name;
     private List<UpgradeAction> upgradeActions = new ArrayList<>();
     private int cost;
+    // cost when the arena uses 3s/4s pricing (a team had 3+ players at game start)
+    private int cost4s;
     private Material currency;
 
     /**
@@ -48,11 +51,19 @@ public class UpgradeTier {
      * @param name       is the upgrade identifier.
      */
     public UpgradeTier(String parentName, String name, ItemStack displayItem, int cost, Material currency) {
+        this(parentName, name, displayItem, cost, cost, currency);
+    }
+
+    /**
+     * @param cost4s cost used when the arena plays with 3s/4s pricing.
+     */
+    public UpgradeTier(String parentName, String name, ItemStack displayItem, int cost, int cost4s, Material currency) {
         this.displayItem = BedWars.nms.addCustomData(displayItem, "MCONT_" + parentName);
         this.name = name;
         Language.saveIfNotExists(Messages.UPGRADES_UPGRADE_TIER_ITEM_NAME.replace("{name}", parentName.replace("upgrade-", "")).replace("{tier}", name), "&cName not set");
         Language.saveIfNotExists(Messages.UPGRADES_UPGRADE_TIER_ITEM_LORE.replace("{name}", parentName.replace("upgrade-", "")).replace("{tier}", name), Collections.singletonList("&cLore not set"));
         this.cost = cost;
+        this.cost4s = cost4s;
         this.currency = currency;
 
         for (String action : UpgradesManager.getConfiguration().getYml().getStringList(parentName + "." + name + ".receive")) {
@@ -205,8 +216,22 @@ public class UpgradeTier {
         return name;
     }
 
+    /**
+     * @return the solo/doubles cost.
+     */
     public int getCost() {
         return cost;
+    }
+
+    /**
+     * @return the cost in the given arena, depending on the pricing chosen at game start.
+     */
+    public int getCost(IArena arena) {
+        return UpgradesManager.isLargeTeamPricing(arena) ? cost4s : cost;
+    }
+
+    public int getCost4s() {
+        return cost4s;
     }
 
     public Material getCurrency() {

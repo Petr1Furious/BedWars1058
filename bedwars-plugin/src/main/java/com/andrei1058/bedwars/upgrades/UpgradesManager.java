@@ -22,6 +22,7 @@ package com.andrei1058.bedwars.upgrades;
 
 import com.andrei1058.bedwars.BedWars;
 import com.andrei1058.bedwars.api.arena.IArena;
+import com.andrei1058.bedwars.api.arena.team.ITeam;
 import com.andrei1058.bedwars.api.language.Language;
 import com.andrei1058.bedwars.api.language.Messages;
 import com.andrei1058.bedwars.api.upgrades.MenuContent;
@@ -29,6 +30,7 @@ import com.andrei1058.bedwars.api.upgrades.UpgradesIndex;
 import com.andrei1058.bedwars.arena.Misc;
 import com.andrei1058.bedwars.configuration.UpgradesConfig;
 import com.andrei1058.bedwars.upgrades.listeners.InventoryListener;
+import com.andrei1058.bedwars.upgrades.listeners.PricingListener;
 import com.andrei1058.bedwars.upgrades.listeners.UpgradeOpenListener;
 import com.andrei1058.bedwars.upgrades.menu.*;
 import org.bukkit.Bukkit;
@@ -41,7 +43,11 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.io.File;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Set;
+import java.util.WeakHashMap;
 import java.util.LinkedList;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -111,7 +117,7 @@ public class UpgradesManager {
             }
         }
 
-        BedWars.registerEvents(new InventoryListener(), new UpgradeOpenListener());
+        BedWars.registerEvents(new InventoryListener(), new UpgradeOpenListener(), new PricingListener());
     }
 
     /**
@@ -266,7 +272,10 @@ public class UpgradesManager {
                 BedWars.debug("Could not load Upgrade " + name + " tier: " + s + ". Currency not set.");
                 continue;
             }
-            UpgradeTier ut = new UpgradeTier(name, s, createDisplayItem(name + "." + s), upgrades.getYml().getInt(name + "." + s + ".cost"), getCurrency(upgrades.getYml().getString(name + "." + s + ".currency")));
+            int cost = upgrades.getYml().getInt(name + "." + s + ".cost");
+            // 3s/4s price, used when a team has 3+ players at game start. Defaults to the regular cost.
+            int cost4s = upgrades.getYml().getInt(name + "." + s + ".cost-4s", cost);
+            UpgradeTier ut = new UpgradeTier(name, s, createDisplayItem(name + "." + s), cost, cost4s, getCurrency(upgrades.getYml().getString(name + "." + s + ".currency")));
             if (!mu.addTier(ut)) {
                 Bukkit.getLogger().log(Level.WARNING, "Could not load tier: " + s + " at upgrade: " + name);
             }
@@ -525,6 +534,78 @@ public class UpgradesManager {
             default:
                 return ChatColor.DARK_GREEN;
         }
+    }
+
+    // arenas whose current game uses the 3s/4s prices
+    private static final Set<IArena> largeTeamPricing = Collections.newSetFromMap(new WeakHashMap<>());
+
+    /**
+     * Choose the price set for a game that is starting: 3s/4s prices if any team has at least 3 players,
+     * otherwise the solo/doubles prices. The choice holds for the whole game.
+     */
+    public static void decidePricing(IArena arena) {
+        if (arena == null) return;
+        boolean large = false;
+        for (ITeam team : arena.getTeams()) {
+            if (team.getMembers().size() >= 3) {
+                large = true;
+                break;
+            }
+        }
+        if (large) {
+            largeTeamPricing.add(arena);
+        } else {
+            largeTeamPricing.remove(arena);
+        }
+        BedWars.debug("Upgrade pricing for " + arena.getArenaName() + ": " + (large ? "3s/4s" : "solo/doubles"));
+    }
+
+    public static void clearPricing(IArena arena) {
+        largeTeamPricing.remove(arena);
+    }
+
+    /**
+     * @return true if the arena's current game uses the 3s/4s upgrade prices.
+     */
+    public static boolean isLargeTeamPricing(IArena arena) {
+        return arena != null && largeTeamPricing.contains(arena);
+    }
+
+    private static String upgradeSetting(ITeam team, String key) {
+        String group = team.getArena().getGroup().toLowerCase() + "-upgrades-settings." + key;
+        return upgrades.getYml().isSet(group) ? group : "default-upgrades-settings." + key;
+    }
+
+    /**
+     * @return the currency traps are bought with for this team's arena group.
+     */
+    public static Material getTrapCurrency(ITeam team) {
+        String st = upgrades.getYml().getString(upgradeSetting(team, "trap-currency"));
+        Material m = st == null ? null : getCurrency(st);
+        return m == null ? Material.DIAMOND : m;
+    }
+
+    /**
+     * Price of the next trap this team would queue.
+     * Uses the {@code trap-prices} list (one entry per queued trap, the last one repeats) when it is set,
+     * {@code trap-prices-4s} instead when the game uses 3s/4s pricing and that list is set,
+     * otherwise the old linear {@code trap-start-price + queued * trap-increment-price}.
+     */
+    public static int getTrapCost(ITeam team) {
+        int queued = team.getActiveTraps().size();
+        List<Integer> prices = null;
+        if (isLargeTeamPricing(team.getArena())) {
+            prices = upgrades.getYml().getIntegerList(upgradeSetting(team, "trap-prices-4s"));
+        }
+        if (prices == null || prices.isEmpty()) {
+            prices = upgrades.getYml().getIntegerList(upgradeSetting(team, "trap-prices"));
+        }
+        if (prices != null && !prices.isEmpty()) {
+            return prices.get(Math.min(queued, prices.size() - 1));
+        }
+        int start = upgrades.getYml().getInt(upgradeSetting(team, "trap-start-price"));
+        int increment = upgrades.getYml().getInt(upgradeSetting(team, "trap-increment-price"));
+        return start + queued * increment;
     }
 
     public static UpgradesConfig getConfiguration() {

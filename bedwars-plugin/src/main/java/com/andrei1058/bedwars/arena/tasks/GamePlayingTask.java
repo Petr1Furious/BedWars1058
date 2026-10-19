@@ -48,12 +48,16 @@ public class GamePlayingTask implements Runnable, PlayingTask {
     private Arena arena;
     private BukkitTask task;
     private int beds_destroy_countdown, dragon_spawn_countdown, game_end_countdown;
+    // seconds into sudden death when every team gets one more dragon (Hypixel: 5 minutes), <= 0 disables
+    private final int extra_dragon_delay;
+    private int sudden_death_elapsed = 0;
 
     public GamePlayingTask(Arena arena) {
         this.arena = arena;
         this.beds_destroy_countdown = BedWars.config.getInt(ConfigPath.GENERAL_CONFIGURATION_BEDS_DESTROY_COUNTDOWN);
         this.dragon_spawn_countdown = BedWars.config.getInt(ConfigPath.GENERAL_CONFIGURATION_DRAGON_SPAWN_COUNTDOWN);
         this.game_end_countdown = BedWars.config.getInt(ConfigPath.GENERAL_CONFIGURATION_GAME_END_COUNTDOWN);
+        this.extra_dragon_delay = BedWars.config.getInt(ConfigPath.GENERAL_CONFIGURATION_EXTRA_DRAGON_DELAY);
         this.task = Bukkit.getScheduler().runTaskTimer(BedWars.plugin, this, 0, 20L);
     }
 
@@ -160,6 +164,10 @@ public class GamePlayingTask implements Runnable, PlayingTask {
                 break;
             case GAME_END:
                 game_end_countdown--;
+                sudden_death_elapsed++;
+                if (extra_dragon_delay > 0 && sudden_death_elapsed == extra_dragon_delay && getGameEndCountdown() > 0) {
+                    spawnExtraDragons();
+                }
                 if (getGameEndCountdown() == 0) {
                     getArena().checkWinner();
                     getArena().changeStatus(GameState.restarting);
@@ -170,6 +178,8 @@ public class GamePlayingTask implements Runnable, PlayingTask {
         for (ITeam t : getArena().getTeams()) {
             if (t.getSize() > 1) {
                 for (Player p : t.getMembers()) {
+                    // holding a tracker compass: the action bar shows the tracked enemy instead
+                    if (TrackerCompass.isTracking(getArena(), p, t)) continue;
                     for (Player p2 : t.getMembers()) {
                         if (p2 == p) continue;
                         if (distance == 0) {
@@ -188,6 +198,8 @@ public class GamePlayingTask implements Runnable, PlayingTask {
                 o.spawn();
             }
         }
+
+        TrackerCompass.tick(getArena());
 
         /* AFK SYSTEM FOR PLAYERS */
         int current = 0;
@@ -252,6 +264,32 @@ public class GamePlayingTask implements Runnable, PlayingTask {
         for (IGenerator o : getArena().getOreGenerators()) {
             o.spawn();
         }
+    }
+
+    /**
+     * Hypixel (v1.9.3): every team still in the game gets one more dragon some time into sudden death.
+     */
+    private void spawnExtraDragons() {
+        Location loc = getArena().getConfig().getArenaLoc("waiting.Loc");
+        if (loc == null) return;
+        int spawned = 0;
+        for (ITeam t : getArena().getTeams()) {
+            if (t.getMembers().isEmpty()) continue;
+            nms.spawnDragon(loc.clone().add(0, 10, 0), t);
+            spawned++;
+        }
+        if (spawned == 0) return;
+        for (Player p : getArena().getPlayers()) {
+            p.sendMessage(getMsg(p, Messages.NEXT_EVENT_CHAT_ANNOUNCE_EXTRA_DRAGON));
+        }
+        for (Player p : getArena().getSpectators()) {
+            p.sendMessage(getMsg(p, Messages.NEXT_EVENT_CHAT_ANNOUNCE_EXTRA_DRAGON));
+        }
+        BedWars.debug("Spawned " + spawned + " extra sudden death dragons in " + getArena().getArenaName());
+    }
+
+    public int getSuddenDeathElapsed() {
+        return sudden_death_elapsed;
     }
 
     public void cancel() {
