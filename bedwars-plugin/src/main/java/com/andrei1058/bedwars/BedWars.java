@@ -303,6 +303,9 @@ public class BedWars extends JavaPlugin {
 
         registerEvents(new InvisibilityPotionListener());
 
+        // Hypixel-style mechanics (punch-to-deposit, footprints)
+        com.andrei1058.bedwars.mechanics.HypixelMechanics.init(this);
+
         /* Load join signs. */
         try {
             loadArenasAndSigns();

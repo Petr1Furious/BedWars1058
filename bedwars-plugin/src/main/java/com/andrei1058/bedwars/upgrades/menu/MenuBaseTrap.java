@@ -226,6 +226,11 @@ public class MenuBaseTrap implements MenuContent, EnemyBaseEnterTrap, TeamUpgrad
 
     @Override
     public void onClick(Player player, ClickType clickType, ITeam team) {
+        if (team.isBedDestroyed()) {
+            Sounds.playSound(ConfigPath.SOUNDS_INSUFF_MONEY, player);
+            player.sendMessage(Language.getMsg(player, com.andrei1058.bedwars.mechanics.MechanicsMessages.TRAP_BED_DESTROYED));
+            return;
+        }
         int queueLimit = UpgradesManager.getConfiguration().getInt(team.getArena().getGroup().toLowerCase() + "-upgrades-settings.trap-queue-limit");
         if (queueLimit == 0) {
             queueLimit = UpgradesManager.getConfiguration().getInt("default-upgrades-settings.trap-queue-limit");
@@ -283,6 +288,7 @@ public class MenuBaseTrap implements MenuContent, EnemyBaseEnterTrap, TeamUpgrad
         team.getActiveTraps().add(this);
         // when a new trap is bought check for enemies on the island #646
         for (Player arenaPlayer : team.getArena().getPlayers()) {
+            if (team.isBedDestroyed()) break;
             if (team.isMember(arenaPlayer)) continue;
             if (team.getArena().isReSpawning(arenaPlayer)) continue;
             if (arenaPlayer.getLocation().distance(team.getBed()) <= team.getArena().getIslandRadius()) {

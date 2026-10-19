@@ -139,26 +139,15 @@ public class Interact implements Listener {
                     }
                     return;
                 }
-                if (b.getType() == Material.CHEST) {
+                if (com.andrei1058.bedwars.mechanics.ChestAccess.isTeamContainer(b.getType())) {
                     if (a.isSpectator(p) || a.getRespawnSessions().containsKey(p)) {
                         e.setCancelled(true);
                         return;
                     }
                     //make it so only team members can open chests while team is alive, and all when is eliminated
-                    ITeam owner = null;
-                    int isRad = a.getConfig().getInt(ConfigPath.ARENA_ISLAND_RADIUS);
-                    for (ITeam t : a.getTeams()) {
-                        if (t.getSpawn().distance(e.getClickedBlock().getLocation()) <= isRad) {
-                            owner = t;
-                        }
-                    }
-                    if (owner != null) {
-                        if (!owner.isMember(p)) {
-                            if (!(owner.getMembers().isEmpty() && owner.isBedDestroyed())) {
-                                e.setCancelled(true);
-                                p.sendMessage(getMsg(p, Messages.INTERACT_CHEST_CANT_OPEN_TEAM_ELIMINATED));
-                            }
-                        }
+                    if (!com.andrei1058.bedwars.mechanics.ChestAccess.canUse(a, p, b)) {
+                        e.setCancelled(true);
+                        p.sendMessage(getMsg(p, Messages.INTERACT_CHEST_CANT_OPEN_TEAM_ELIMINATED));
                     }
                 }
                 if (a.isSpectator(p) || a.getRespawnSessions().containsKey(p)) {
@@ -169,6 +158,7 @@ public class Interact implements Listener {
                         case "WORKBENCH":
                         case "HOPPER":
                         case "TRAPPED_CHEST":
+                        case "BARREL":
                         case "CRAFTING_TABLE":
                             e.setCancelled(true);
                             break;
