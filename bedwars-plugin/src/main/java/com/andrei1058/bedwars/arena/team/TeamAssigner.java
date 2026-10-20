@@ -39,8 +39,8 @@ public class TeamAssigner implements ITeamAssigner {
 
     public void assignTeams(IArena arena) {
 
-        // team up parties first
-        if (arena.getPlayers().size() > arena.getMaxInTeam() && arena.getMaxInTeam() > 1) {
+        // team up parties first, whatever the player count (TeamBalancer then keeps them whole and spreads the rest)
+        if (arena.getMaxInTeam() > 1) {
             LinkedList<List<Player>> teams = new LinkedList<>();
 
             List<Player> members;

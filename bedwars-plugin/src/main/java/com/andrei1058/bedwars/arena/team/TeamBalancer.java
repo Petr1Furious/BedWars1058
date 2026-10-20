@@ -34,16 +34,17 @@ import java.util.logging.Level;
 
 /**
  * Post-pass run after whichever {@link com.andrei1058.bedwars.api.arena.team.ITeamAssigner} placed the players
- * at game start (the built-in ones or an add-on's, e.g. TeamSelector).
- * <p>
- * Assigners tend to fill the first team with room before moving on, which with a large {@code maxInTeam}
- * puts every player who did not pick a team into the same team. This pass:
+ * at game start (the built-in ones or an add-on's, e.g. TeamSelector), so the result does not depend on which
+ * assigner ran. Hypixel-style:
  * <ol>
- *     <li>redistributes players who made no explicit choice (no team selected, no party in the arena)
- *     evenly, always onto the least populated team;</li>
- *     <li>if all players still end up in a single team (everybody chose it, or one party), splits that
- *     team in two, moving team-selector choices before parties and whole parties before splitting one.</li>
+ *     <li>players who picked a team with the TeamSelector add-on (and are not in a party) stay where they are;</li>
+ *     <li>every party, biggest first, is placed whole on the least populated team that has room for it. A party
+ *     bigger than a team ({@code maxInTeam}) is split as evenly as possible across the fewest teams;</li>
+ *     <li>everybody else (no pick, no party in the arena) fills the least populated team, one at a time;</li>
+ *     <li>if all players still end up in a single team (everybody chose it, or one party), that team is split in
+ *     two, moving team-selector choices before parties and whole parties before splitting one.</li>
  * </ol>
+ * Party membership wins over a team-selector pick (the add-on refuses picks from party members anyway).
  */
 public final class TeamBalancer {
 
@@ -69,29 +70,38 @@ public final class TeamBalancer {
         Set<UUID> inParty = new HashSet<>();
         parties.forEach(party -> party.forEach(p -> inParty.add(p.getUniqueId())));
 
-        // 1. spread players who made no choice
+        // take every party member and every player without a choice out of their team; picks stay put
         List<Player> free = new ArrayList<>();
         for (Player p : assigned) {
             if (!chosen.contains(p.getUniqueId()) && !inParty.contains(p.getUniqueId())) free.add(p);
         }
         Map<UUID, ITeam> before = new HashMap<>();
-        for (Player p : free) {
+        for (Player p : assigned) {
+            if (!free.contains(p) && !inParty.contains(p.getUniqueId())) continue;
             ITeam t = arena.getTeam(p);
             before.put(p.getUniqueId(), t);
             unassign(t, p);
         }
+
+        // 1. parties first, biggest first, each kept on one team when it fits
+        parties.sort(Comparator.comparingInt((List<Player> l) -> l.size()).reversed());
+        for (List<Player> party : parties) {
+            placeParty(arena, teams, party, before);
+        }
+
+        // 2. solo players fill the least populated teams
         for (Player p : free) {
             ITeam target = leastPopulated(arena, teams);
             if (target == null) target = before.get(p.getUniqueId());
             target.addPlayers(p);
         }
 
-        // 2. never start with a single team
+        // 3. never start with a single team
         ITeam only = null;
         for (ITeam t : teams) {
             if (t.getMembers().isEmpty()) continue;
             if (only != null) {
-                logResult(arena, before);
+                logResult(arena, parties, free.size());
                 return;
             }
             only = t;
@@ -145,18 +155,68 @@ public final class TeamBalancer {
         }
         BedWars.plugin.getLogger().info("Arena " + arena.getArenaName() + ": all " + total + " players were in team "
                 + only.getName() + ", moved " + moved.size() + " to team " + other.getName());
-        logResult(arena, before);
+        logResult(arena, parties, free.size());
     }
 
-    private static void logResult(IArena arena, Map<UUID, ITeam> before) {
+    private static void logResult(IArena arena, List<List<Player>> parties, int solo) {
         StringBuilder sb = new StringBuilder();
         for (ITeam t : arena.getTeams()) {
             if (t.getMembers().isEmpty()) continue;
             if (sb.length() > 0) sb.append(", ");
             sb.append(t.getName()).append('=').append(t.getMembers().size());
         }
+        StringBuilder ps = new StringBuilder();
+        for (List<Player> party : parties) {
+            Set<String> on = new LinkedHashSet<>();
+            for (Player p : party) {
+                ITeam t = arena.getTeam(p);
+                on.add(t == null ? "none" : t.getName());
+            }
+            ps.append(", party of ").append(party.size()).append(" on ").append(String.join("+", on));
+        }
         BedWars.plugin.getLogger().info("Arena " + arena.getArenaName() + " teams at start: " + sb
-                + " (" + before.size() + " players without a choice were spread)");
+                + " (" + solo + " players without a choice were spread" + ps + ")");
+    }
+
+    /**
+     * Put a whole party on the least populated team with room for it. If no team can hold it (it is bigger than
+     * {@code maxInTeam}, or the teams are already partly taken), split it as evenly as possible across the fewest
+     * teams: k teams with the most room, parts of size/k (the bigger parts on the roomier teams), trying k = 2, 3, ...
+     */
+    private static void placeParty(IArena arena, List<ITeam> teams, List<Player> party, Map<UUID, ITeam> before) {
+        int max = arena.getMaxInTeam();
+        List<ITeam> open = new ArrayList<>();
+        for (ITeam t : teams) {
+            if (t.getMembers().size() < max) open.add(t);
+        }
+        // most room first; stable, so ties keep the arena's team order
+        open.sort(Comparator.comparingInt(t -> t.getMembers().size()));
+
+        int size = party.size();
+        for (int k = Math.max(1, (size + max - 1) / max); k <= Math.min(size, open.size()); k++) {
+            boolean fits = true;
+            for (int i = 0; i < k; i++) {
+                int part = size / k + (i < size % k ? 1 : 0);
+                if (max - open.get(i).getMembers().size() < part) {
+                    fits = false;
+                    break;
+                }
+            }
+            if (!fits) continue;
+            int next = 0;
+            for (int i = 0; i < k; i++) {
+                int part = size / k + (i < size % k ? 1 : 0);
+                ITeam target = open.get(i);
+                for (int j = 0; j < part; j++) target.addPlayers(party.get(next++));
+            }
+            return;
+        }
+        // cannot happen while there are fewer players than slots; keep everybody somewhere anyway
+        for (Player p : party) {
+            ITeam target = leastPopulated(arena, teams);
+            if (target == null) target = before.get(p.getUniqueId());
+            target.addPlayers(p);
+        }
     }
 
     private static ITeam leastPopulated(IArena arena, List<ITeam> teams) {
