@@ -33,6 +33,7 @@ import com.andrei1058.bedwars.api.language.Messages;
 import com.andrei1058.bedwars.arena.Arena;
 import com.andrei1058.bedwars.arena.tasks.TrackerCompass;
 import com.andrei1058.bedwars.configuration.Sounds;
+import com.andrei1058.bedwars.shop.HotbarPlacement;
 import com.andrei1058.bedwars.shop.ShopCache;
 import com.andrei1058.bedwars.shop.quickbuy.PlayerQuickBuyCache;
 import com.andrei1058.bedwars.shop.quickbuy.QuickBuyElement;
@@ -133,6 +134,16 @@ public class CategoryContent implements ICategoryContent {
     }
 
     public void execute(Player player, ShopCache shopCache, int slot) {
+        execute(player, shopCache, slot, -1);
+    }
+
+    /**
+     * Buy this content.
+     *
+     * @param hotbarSlot 0-8 when bought with a hotbar number key: the item is put in that hotbar slot
+     *                   and whatever held it moves to the next free slot. -1 for a normal click.
+     */
+    public void execute(Player player, ShopCache shopCache, int slot, int hotbarSlot) {
 
         IContentTier ct;
 
@@ -181,6 +192,20 @@ public class CategoryContent implements ICategoryContent {
             return;
         }
 
+        // number key: armour (auto-equipped) ignores it; refuse up front if the displaced item has nowhere to go
+        IBuyItem hotbarItem = hotbarSlot < 0 || hotbarSlot > 8 ? null : HotbarPlacement.hotbarItem(ct);
+        if (hotbarItem == null) {
+            hotbarSlot = -1;
+        } else {
+            IArena arena = Arena.getArenaByPlayer(player);
+            ITeam team = arena == null ? null : arena.getTeam(player);
+            if (!HotbarPlacement.canPlace(player, hotbarItem, getIdentifier(), team, hotbarSlot)) {
+                player.sendMessage(getMsg(player, Messages.SHOP_INVENTORY_FULL));
+                Sounds.playSound(ConfigPath.SOUNDS_INSUFF_MONEY, player);
+                return;
+            }
+        }
+
         ShopBuyEvent event;
         //call shop buy event
         Bukkit.getPluginManager().callEvent(event = new ShopBuyEvent(player, Arena.getArenaByPlayer(player), this));
@@ -197,7 +222,12 @@ public class CategoryContent implements ICategoryContent {
 
 
         //give items
-        giveItems(player, shopCache, Arena.getArenaByPlayer(player));
+        if (hotbarSlot >= 0) HotbarPlacement.arm(player, hotbarSlot);
+        try {
+            giveItems(player, shopCache, Arena.getArenaByPlayer(player));
+        } finally {
+            HotbarPlacement.disarm(player);
+        }
 
         //play sound
         Sounds.playSound(ConfigPath.SOUNDS_BOUGHT, player);

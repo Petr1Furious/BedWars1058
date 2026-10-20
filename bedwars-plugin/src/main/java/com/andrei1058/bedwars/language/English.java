@@ -941,6 +941,7 @@ public class English extends Language {
         yml.addDefault(Messages.SHOP_NEW_PURCHASE, "{prefix}&aYou purchased &6{item}");
         yml.addDefault(Messages.SHOP_ALREADY_BOUGHT, "{prefix}&cYou've already bought that!");
         yml.addDefault(Messages.SHOP_REQUIRES_ENEMY_BEDS_DESTROYED, "{prefix}&cYou can only buy this once all enemy beds are destroyed!");
+        yml.addDefault(Messages.SHOP_INVENTORY_FULL, "{prefix}&cYour inventory is full!");
         yml.addDefault(Messages.SHOP_UTILITY_NPC_SILVERFISH_NAME, "{TeamColor}&l{TeamName} &r{TeamColor}Silverfish");
         yml.addDefault(Messages.SHOP_UTILITY_NPC_IRON_GOLEM_NAME, "{TeamColor}{despawn}s &8[ {TeamColor}{health}&8]");
         yml.addDefault(Messages.SHOP_SEPARATOR_NAME, "&8⇧ Categories");

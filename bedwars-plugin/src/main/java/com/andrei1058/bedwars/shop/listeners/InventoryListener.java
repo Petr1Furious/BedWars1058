@@ -33,6 +33,7 @@ import com.andrei1058.bedwars.shop.quickbuy.QuickBuyElement;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.*;
 import org.bukkit.inventory.ItemStack;
@@ -83,7 +84,7 @@ public class InventoryListener implements Listener {
                         p.closeInventory();
                         return;
                     }
-                    element.getCategoryContent().execute(p, shopCache, element.getSlot());
+                    element.getCategoryContent().execute(p, shopCache, element.getSlot(), hotbarKey(e));
                     return;
                 }
             }
@@ -106,7 +107,7 @@ public class InventoryListener implements Listener {
                             new QuickBuyAdd(p, cc);
                             return;
                         }
-                        cc.execute(p, shopCache, cc.getSlot());
+                        cc.execute(p, shopCache, cc.getSlot(), hotbarKey(e));
                         return;
                     }
                 }
@@ -128,7 +129,19 @@ public class InventoryListener implements Listener {
         }
     }
 
-    @EventHandler
+    /**
+     * The hotbar slot (0-8) of a number-key click, else -1. The click itself is cancelled by the
+     * shop handlers, so vanilla never swaps anything into or out of the GUI.
+     */
+    private static int hotbarKey(InventoryClickEvent e) {
+        if (e.getClick() != ClickType.NUMBER_KEY) return -1;
+        int button = e.getHotbarButton();
+        return button >= 0 && button <= 8 ? button : -1;
+    }
+
+    // HIGH so the shop handler above sees the click first: cancelling a number key over the shop
+    // because slot N holds a permanent item must not stop the purchase into slot N.
+    @EventHandler(priority = EventPriority.HIGH)
     public void onUpgradableMove(InventoryClickEvent e) {
 
         Player p = (Player) e.getWhoClicked();

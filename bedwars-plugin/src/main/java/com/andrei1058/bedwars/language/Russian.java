@@ -786,6 +786,7 @@ public class Russian extends Language{
         yml.addDefault(Messages.SHOP_NEW_PURCHASE, "{prefix}&aТы купил &6{item}");
         yml.addDefault(Messages.SHOP_ALREADY_BOUGHT, "{prefix}&cТы уже купил это!");
         yml.addDefault(Messages.SHOP_REQUIRES_ENEMY_BEDS_DESTROYED, "{prefix}&cЭто можно купить только когда все вражеские кровати разрушены!");
+        yml.addDefault(Messages.SHOP_INVENTORY_FULL, "{prefix}&cТвой инвентарь полон!");
         yml.addDefault(Messages.SHOP_QUICK_ADD_NAME, "&8Добавление в быструю покупку...");
         yml.addDefault(Messages.SHOP_UTILITY_NPC_SILVERFISH_NAME, "{TeamColor}&l{TeamName} &r{TeamColor}Silverfish");
         yml.addDefault(Messages.SHOP_UTILITY_NPC_IRON_GOLEM_NAME, "{TeamColor}{despawn}s &8[ {TeamColor}{health}&8]");

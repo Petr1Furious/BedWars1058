@@ -26,6 +26,7 @@ import com.andrei1058.bedwars.api.arena.shop.IBuyItem;
 import com.andrei1058.bedwars.api.arena.team.TeamEnchant;
 import com.andrei1058.bedwars.api.configuration.ConfigPath;
 import com.andrei1058.bedwars.configuration.Sounds;
+import com.andrei1058.bedwars.shop.HotbarPlacement;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -263,7 +264,7 @@ public class BuyItem implements IBuyItem {
             }
         }
         //
-        player.getInventory().addItem(i);
+        HotbarPlacement.addItem(player, i);
         player.updateInventory();
     }
 
